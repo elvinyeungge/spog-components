@@ -1,0 +1,24 @@
+{
+  "name": "spog-px-context-browser",
+  "authors": [
+    "212572063 <justin.le@ge.com>"
+  ],
+  "description": "px-context-browser customized for spog",
+  "main": "",
+  "keywords": [
+    "spog",
+    "bms"
+  ],
+  "license": "MIT",
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "px-context-browser": "https://github.com/bms-spog/px-context-browser.git"
+  }
+}

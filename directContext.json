@@ -1,0 +1,11 @@
+ {
+"data": [
+    {
+        "identifier": "001-1",
+        "name": "BMS1",
+        "isOpenable" : true,
+        "hasChildren": true
+    }
+],
+"meta": { "parentId": null }
+}
