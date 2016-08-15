@@ -27,18 +27,6 @@ function demoGetChildren(node) {
             return;
         }
     });
-    //get our url - if there's no valid nodeId, resolve an empty promise.
-    // if (nodeIds[nodeId]) {
-    //     ironAjaxEl.url = nodeIds[nodeId];
-    //     //and generate the promise.
-    //     ironAjaxEl.generateRequest();
-    // } else if(node){
-    //     deferred.resolve({ data: node.children, meta: { parentId: nodeId } });
-    //     //var data = apmCall(node);
-    //     // setTimeout(deferred.resolve({data:apmCall(node),meta:{parentId:nodeId}}),3000);
-    // } else {
-    //   deferred.resolve({ data: [], meta: { parentId: nodeId } });
-    // }
     $injector = angular.injector(['ng']);
     http = $injector.get('$http');
     var parent;
@@ -47,32 +35,27 @@ function demoGetChildren(node) {
     } else {
         parent = node.uri;
     }
-    //url to call to apm - parent comes from node. null returns enterprises
+    //url to apm service- parent comes from node. parent=null returns enterprises
+    //contextbrowser/api/ is our reverse proxy
     var url = 'contextbrowser/api/allInstances?parent=' + parent;
-    // console.log("NODE");
-    // console.log(node);
-
-    //call itself
+    //the http request 
     http.get(url)
         .then(function(response){
-            // console.log("RESPONSE");
-            // console.log(response.data);
             if(response.data.length>0){
                 for(var ii=0;ii<response.data.length;ii++){
-                    //add identifiers to children
+                    //add attributes to children. identifier is necessary for the browser to open the next column
                     response.data[ii]['identifier'] = node.identifier + ('a' + ii);
                     response.data[ii]['hasChildren'] = true;
                     //response.data[ii]['isOpenable'] = true;
                 }
             }
-
             if(nodeId){
                 var pId = nodeId;
             } else{
                 nodeId = node.name;
             }
             deferred.resolve({data:response.data,meta:{parentId:nodeId}});
-        }); //eo http.get.then
+        });
     //don't forget to return the promise!
     return deferred.promise;
 }
