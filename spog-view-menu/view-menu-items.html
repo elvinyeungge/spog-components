@@ -1,0 +1,102 @@
+<dom-module id="view-menu-items">
+
+  <link rel="import" type="css" href="view-menu-items.css">
+  <template>
+      <iron-ajax
+        id="getViewMenuItems"
+        handle-as="json"
+        headers='{"accept": "application/hal+json"}'
+        method="GET"
+        content-type="application/json"
+        on-response="_getViewMenuItemsData">
+      </iron-ajax>
+      <div class="px-dropdown-container">
+          <px-dropdown 
+          id="pxDropdown"
+          display-value="Views"
+          on-tap="_dropdownMenuItemChanged">
+          <px-dropdown-content 
+            items="{{dropdownItems}}"
+            class="px-dropdown-content"
+            max-cont-character-width="10"
+            extend-dropdown="true" 
+            extend-dropdown-by="15">
+            </px-dropdown-content>
+          </px-dropdown>
+      </div> 
+  </template>
+</dom-module>
+
+<script>
+  Polymer({
+      is: 'view-menu-items',
+      properties: {
+        dropdownItems: {
+          type: Array,
+          default: [],
+          observer: 'readIt'
+        },
+        testData: {
+          type: String,
+          value: ''
+        }
+      },
+      ready: function() {
+        this.async(function() {
+          this.$.getViewMenuItems.url= "././nav/viewMenu.json";
+          this.$.getViewMenuItems.generateRequest();
+
+        }, 0);
+      },
+      readIt: function(){
+        console.log('readIt');
+      },
+      _getViewMenuItemsData:function(e){
+          var self = this;
+          let responseData = e.detail.__data__.response;
+          if(responseData){
+            this._generateDataForDropdownContent(responseData);
+          }
+      },
+      _generateDataForDropdownContent: function(responseData){
+        this.dropdownItems = responseData.map(function(obj, index){
+            let formattedObj = {
+             "key": (index + 1).toString(),
+             "val": obj.label,
+             "path": obj.path,
+             "state": obj.state
+            };
+            return formattedObj;
+          });
+      },
+      _dropdownMenuItemChanged: function(evt) {
+        let selectedView = this.$.pxDropdown.displayValue;
+
+        var idx = this._getSelectedViewIndex(this.dropdownItems, selectedView);
+
+        // if(idx > -1){
+        //   this._navigateToURL(this.dropdownItems[idx]);
+        // }
+
+        if(idx > -1){
+          this._emitDropDownItemChangedEvent(this.dropdownItems[idx]);
+        }
+      },
+      _getSelectedViewIndex: function(dropdownItems, selectedView){
+        return _.findIndex(dropdownItems, function(o) { return o.val == selectedView; });
+      },
+      _emitDropDownItemChangedEvent:function(selectedViewItem){
+          var evt = {};
+          evt.selectedViewItem = selectedViewItem;
+          this.fire('viewDropdownItemChanged', evt);
+      },
+      _navigateToURL: function(selectedViewItem){
+          let originPath = window.location.href.split('/#');
+          if(originPath && originPath.length > 0){
+            let url = originPath[0] + selectedViewItem.path;
+            window.location.href = url;  
+          }
+      }
+
+  });
+</script>
