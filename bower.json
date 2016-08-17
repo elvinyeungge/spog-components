@@ -1,9 +1,9 @@
 {
-  "name": "spog-px-context-browser",
+  "name": "spog-components",
   "authors": [
     "212572063 <justin.le@ge.com>"
   ],
-  "description": "px-context-browser customized for spog",
+  "description": "single pane of glass components",
   "main": "",
   "keywords": [
     "spog",
@@ -19,7 +19,7 @@
     "tests"
   ],
   "dependencies": {
-    "px-context-browser": "https://github.com/bms-spog/px-context-browser.git",
+    "px-context-browser": "https://github.com/bms-spog/spog-px-context-browser.git",
     "px-dropdown": "https://github.com/PredixDev/px-dropdown.git"
   }
 }
