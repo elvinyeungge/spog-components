@@ -34,7 +34,7 @@
         dropdownItems: {
           type: Array,
           default: [],
-          observer: 'readIt'
+          observer: 'dropdownItemsChanged'
         },
         testData: {
           type: String,
@@ -48,8 +48,7 @@
 
         }, 0);
       },
-      readIt: function(){
-        console.log('readIt');
+      dropdownItemsChanged: function(){
       },
       _getViewMenuItemsData:function(e){
           var self = this;
