@@ -19,7 +19,7 @@
     "tests"
   ],
   "dependencies": {
-    "px-context-browser": "https://github.com/bms-spog/spog-px-context-browser.git",
+    "spog-px-context-browser": "https://github.com/bms-spog/spog-px-context-browser.git",
     "px-dropdown": "https://github.com/PredixDev/px-dropdown.git"
   }
 }
