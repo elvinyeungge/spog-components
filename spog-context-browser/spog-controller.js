@@ -36,22 +36,6 @@ class controller {
 	        }
 	    });
 
-	    //get our url - if there's no valid nodeId, resolve an empty promise.
-	    // if (nodeIds[nodeId]) {
-	    //     ironAjaxEl.url = nodeIds[nodeId];
-	    //     //and generate the promise.
-	    //     ironAjaxEl.generateRequest();
-	    // } else if(node){
-	    //     deferred.resolve({ data: node.children, meta: { parentId: nodeId } });
-	    //     //var data = apmCall(node);
-	    //     // setTimeout(deferred.resolve({data:apmCall(node),meta:{parentId:nodeId}}),3000);
-	    // } else {
-	    //   deferred.resolve({ data: [], meta: { parentId: nodeId } });
-	    // }
-
-	    // $injector = angular.injector(['ng']);
-	    // http = $injector.get('$http');
-	    
 	    var parent;
 	    if(!node.uri){
 	        parent = 'null';
@@ -60,17 +44,12 @@ class controller {
 	    }
 	    //url to call to apm - parent comes from node. null returns enterprises
 	    var url = 'contextbrowser/api/allInstances?parent=' + parent;
-	    // console.log("NODE");
-	    // console.log(node);
-
 	    //call itself
 	    $http.get(url)
 	        .then(function(response){
-	            // console.log("RESPONSE");
-	            // console.log(response.data);
 	            if(response.data.length>0){
 	                for(var ii=0;ii<response.data.length;ii++){
-	                    //add identifiers to children
+	                    //add context-browser attributes
 	                    response.data[ii]['identifier'] = node.identifier + ('a' + ii);
 	                    response.data[ii]['hasChildren'] = true;
 	                    response.data[ii]['isOpenable'] = true;
@@ -92,6 +71,21 @@ class controller {
 		
 		var counter = 0;
 	    var colBrowser = document.querySelector('px-context-browser');
+	    //initial context call for first column
+	    $http.get('contextbrowser/api/allInstances?parent=null')
+	        .then(function(response){
+	            if(response.data.length>0){
+	                for(var ii=0;ii<response.data.length;ii++){
+	                    //add identifiers to children
+	                    
+	                    response.data[ii]['identifier'] = '00-' + ii;
+	                    response.data[ii]['hasChildren'] = true;
+	                    response.data[ii]['isOpenable'] = true;
+	                }
+	                colBrowser.browserContext=initialContext(response.data);
+	            }
+	        });
+
 	    colBrowser.handlers = {
 	        getChildren: function(parent, newIndex) {
 	        	return demoGetChildren(parent);
@@ -107,6 +101,13 @@ class controller {
 
 	    self.navigateToSelectedView();
 	});
+
+	function initialContext(data){
+		var obj = {};
+		obj.data=data;
+		obj.meta={ "parentId": null };
+		return obj;
+	};
 
     self.defaultToPreSelectedView = function (){ 
     	let currentState = AppHubService.getState();
