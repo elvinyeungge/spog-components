@@ -1,0 +1,20 @@
+[
+  {
+    "label": "Search",
+    "icon": "fa-search",
+    "path": "/#/search",
+    "state": "search"
+  },
+  {
+    "label": "Average Queue",
+    "icon": "fa-tachometer",
+    "path": "/#/avgQueue",
+    "state": "avgQueue"
+  },
+  {
+    "label": "Order",
+    "icon": "fa-truck",
+    "path": "/#/order/",
+    "state": "order"
+  }
+]
