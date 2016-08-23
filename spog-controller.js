@@ -7,17 +7,46 @@ class controller {
 
   init($http, $state, $q, $rootScope, AppHubService){
   	var self = this;
+	
+	angular.element(document).ready(function() {
+		var counter = 0;
+	    var colBrowser = document.querySelector('px-context-browser');
+	    if(colBrowser){
+			self.initContextBrowser(colBrowser);
+		}
+	    self.defaultToPreSelectedView();
 
-  	/**
-	-----------------------CONFIGURATIONS-------------------------------------------
-	Change this variable to however many columns you want to display
-	*/
-	var numberOfColumns = 3;
+	    self.navigateToSelectedView();
+	}); //eo ready
 
-	//Change this if you want your context browser to display ALL the children
-	var showAllChildren = false;
-	//------------------------------------------------------------------------------
+	self.initContextBrowser = function(browser){
+		
+	    //initial context call for first column
+	    $http.get('contextbrowser/api/allInstances?parent=null')
+	        .then(function(response){
+	            if(response.data.length>0){
+	                for(var ii=0;ii<response.data.length;ii++){
+	                    //add identifiers to children
+	                    
+	                    response.data[ii]['identifier'] = '00-' + ii;
+	                    response.data[ii]['hasChildren'] = true;
+	                    response.data[ii]['isOpenable'] = true;
+	                }
+	                browser.browserContext=initialContext(response.data);
+	            }
+	        });
 
+	    browser.handlers = {
+	        getChildren: function(parent, newIndex) {
+	        	return demoGetChildren(parent);
+	        },
+	        itemOpenHandler: function(context) {
+	        	var customEvent = {};
+	        	customEvent.data = 'something';
+	        	$rootScope.$emit(customEvent);
+	        }
+	    };
+	}
 	function demoGetChildren(node) {
 	    
 	    var nodeId = node.identifier,
@@ -66,40 +95,6 @@ class controller {
 	    //don't forget to return the promise!
 	    return deferred.promise;
 	}
-
-	angular.element(document).ready(function() {
-		var counter = 0;
-	    var colBrowser = document.querySelector('px-context-browser');
-	    //initial context call for first column
-	    $http.get('contextbrowser/api/allInstances?parent=null')
-	        .then(function(response){
-	            if(response.data.length>0){
-	                for(var ii=0;ii<response.data.length;ii++){
-	                    //add identifiers to children
-	                    
-	                    response.data[ii]['identifier'] = '00-' + ii;
-	                    response.data[ii]['hasChildren'] = true;
-	                    response.data[ii]['isOpenable'] = true;
-	                }
-	                colBrowser.browserContext=initialContext(response.data);
-	            }
-	        });
-
-	    colBrowser.handlers = {
-	        getChildren: function(parent, newIndex) {
-	        	return demoGetChildren(parent);
-	        },
-	        itemOpenHandler: function(context) {
-	        	var customEvent = {};
-	        	customEvent.data = 'something';
-	        	$rootScope.$emit(customEvent);
-	        }
-	    };
-
-	    self.defaultToPreSelectedView();
-
-	    self.navigateToSelectedView();
-	});
 
 	function initialContext(data){
 		var obj = {};
