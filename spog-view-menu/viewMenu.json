@@ -1,23 +1,20 @@
 { 
-  "appName": "wip",
+  "appName": "SampleApp",
   "menuItems": [ 
   {
     "label": "Search",
-    "icon": "fa-search",
     "path": "/#/search",
     "state": "search",
     "default": false
   },
   {
     "label": "Average Queue",
-    "icon": "fa-tachometer",
     "path": "/#/avgQueue",
     "state": "avgQueue",
     "default": true
   },
   {
     "label": "Order",
-    "icon": "fa-truck",
     "path": "/#/order/",
     "state": "order",
     "default": false

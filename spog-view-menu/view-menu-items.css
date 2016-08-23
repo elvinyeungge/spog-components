@@ -3,15 +3,8 @@
   width: 127px;
   top: -52px;
   left: 35%;
-  z-index: 1; }
-
-#dropcell.px-dropdown {
-  text-align: center;
-  width: 100%;
-  background-color: white;
-  border: 1px solid #b1b1bc;
-  border-radius: 3px;
-  cursor: pointer; }
+  z-index: 1; 
+}
 
 px-dropdown #dropcell > px-dropdown-chevron {
   width: 20px; 
@@ -21,3 +14,4 @@ px-dropdown #dropcell > px-dropdown-chevron {
   font-size: 0.999999rem;
   line-height: 1; 
 }
+

@@ -14,6 +14,9 @@ class controller {
 	    if(colBrowser){
 			self.initContextBrowser(colBrowser);
 		}
+
+		self.updateStyleIfNoContextBrowser(colBrowser);
+
 	    self.defaultToPreSelectedView();
 
 	    self.navigateToSelectedView();
@@ -198,6 +201,23 @@ class controller {
 	    selectedViews.push(microAppState);
 	    return selectedViews;
     };
+
+    self.updateStyleIfNoContextBrowser = function(colBrowser){
+		if(!colBrowser){
+	    	let dropDownContainer =  document.querySelector('#pxDropdownContainer');
+	    	dropDownContainer.style.top = "2px";
+			dropDownContainer.style.marginBottom = "10px";
+		}
+
+		let dropcell = document.querySelector('#dropcell');
+		if(dropcell){
+			dropcell.style.textAlign = "center";
+		    dropcell.style.width = "100%";
+		    dropcell.style.backgroundColor= "white";
+		    dropcell.style.borderRadius= "3px";
+		    dropcell.style.cursor= "pointer";
+		}
+	};
 
 	function recursiveAddChildren(currentRoot){
 	    return null;
