@@ -68,7 +68,6 @@ class controller {
 	}
 
 	angular.element(document).ready(function() {
-		
 		var counter = 0;
 	    var colBrowser = document.querySelector('px-context-browser');
 	    //initial context call for first column
@@ -109,32 +108,100 @@ class controller {
 		return obj;
 	};
 
-    self.defaultToPreSelectedView = function (){ 
-    	let currentState = AppHubService.getState();
-	 	let preSelectedView = currentState.selectedView;
+	self.defaultToPreSelectedView = function (){ 
+		var viewMenuItems = document.querySelector('view-menu-items');
+		var pxDropDownElement = document.querySelector("#pxDropdown");
+						
+    	if(viewMenuItems){
+    		let currentAppName = viewMenuItems.appName;
+    		let currentState = AppHubService.getState();
 
-	 	if(preSelectedView){
-	 		var pxDropDownElement = document.querySelector("#pxDropdown");
-	 		pxDropDownElement.displayValue = currentState.selectedView;
-	 		$state.go(currentState.selectedState);
-	 	}
-    };
+    		let preSelectedViewExists = false;
+
+	        if(currentState){
+	        	if(currentState.selectedViews){
+	        		
+	        		let appIdx = _.findIndex(currentState.selectedViews, function(o) { return o.appName == currentAppName; });	
+	        		//There's a PreSelected View for this App
+					if(appIdx > -1){
+						preSelectedViewExists = true;
+						pxDropDownElement.displayValue = currentState.selectedViews[appIdx].selectedView;
+						$state.go(currentState.selectedViews[appIdx].selectedState, {});
+					}
+				}
+	        }
+
+			if(!preSelectedViewExists){
+				self.goToDefaultState(viewMenuItems.dropdownItems, pxDropDownElement);
+			}
+	    }
+	};
 
     self.navigateToSelectedView = function (){
+    	
+    	let currentState = AppHubService.getState();
     	var viewMenuItems = document.querySelector('view-menu-items');
-	    viewMenuItems.addEventListener('viewDropdownItemChanged', function(evt){
-	    	if(evt.detail){
-	    		if(evt.detail.selectedViewItem){
-	    			let myState = {
-				      'selectedState': evt.detail.selectedViewItem.state,
-				      'selectedView': evt.detail.selectedViewItem.val
-				    };
+		
+    	if(viewMenuItems){
+    		viewMenuItems.addEventListener('viewDropdownItemChanged', function(evt){
+		    	if(evt.detail){
+		    		if(evt.detail.selectedViewItem){
 
-	    			AppHubService.setState(myState);
-	    			$state.go(myState.selectedState);
-	    		}
-	    	}
-	    });
+		    			let appNameOfSelectedViewFoundInState = false;
+		    			
+		    			if(currentState){
+							if(currentState.selectedViews){								
+								let appIdx = _.findIndex(currentState.selectedViews, function(o) { return o.appName === evt.detail.selectedViewItem.appName; });
+								//The app state is already in SessionState, just update View value
+								if(appIdx > -1){
+									appNameOfSelectedViewFoundInState = true;
+									currentState.selectedViews = self.updateSelectedViewOfAMicroApp(currentState.selectedViews, appIdx, evt.detail);
+								}
+							}
+	                    }
+
+	                    if(!appNameOfSelectedViewFoundInState){
+	                    	if(!currentState){ currentState = {}; }
+					    	if(!currentState.selectedViews){ currentState.selectedViews = []; }
+					    	currentState.selectedViews = self.addNewMicroAppToState(currentState.selectedViews, evt.detail);
+	                    }
+
+		    			AppHubService.setState(currentState);
+		    			$state.go(evt.detail.selectedViewItem.state, {});
+		    		}
+		    	}
+		    });
+    	}
+	};
+
+    self.goToDefaultState = function(dropdownItems, pxDropdown){
+    	if(dropdownItems && dropdownItems.length>0){
+
+			let defaultStateIdx = _.findIndex(dropdownItems, function(o) { return o.default === true; });
+
+			if(defaultStateIdx > -1){
+				pxDropdown.displayValue = dropdownItems[defaultStateIdx].val;
+				$state.go(dropdownItems[defaultStateIdx].state, {});
+				//push the new app into selected Views?	
+			}
+    	}
+    };
+
+    self.updateSelectedViewOfAMicroApp = function(selectedViews, idx, eventDetail){
+    	selectedViews[idx].appName = eventDetail.selectedViewItem.appName;
+		selectedViews[idx].selectedState = eventDetail.selectedViewItem.state;
+		selectedViews[idx].selectedView = eventDetail.selectedViewItem.val;
+		return selectedViews;
+    };
+
+    self.addNewMicroAppToState = function(selectedViews, eventDetail){
+    	let microAppState = {
+		  'appName': eventDetail.selectedViewItem.appName,
+	      'selectedState': eventDetail.selectedViewItem.state,
+	      'selectedView': eventDetail.selectedViewItem.val
+	    };
+	    selectedViews.push(microAppState);
+	    return selectedViews;
     };
 
 	function recursiveAddChildren(currentRoot){

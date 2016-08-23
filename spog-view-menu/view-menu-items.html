@@ -36,34 +36,46 @@
           default: [],
           observer: 'dropdownItemsChanged'
         },
-        testData: {
-          type: String,
-          value: ''
-        }
+        appName: ''
       },
       ready: function() {
+
         this.async(function() {
           this.$.getViewMenuItems.url= "nav/viewMenu.json";
           this.$.getViewMenuItems.generateRequest();
 
         }, 0);
       },
+      attached: function(){
+        this.async(function(){
+          
+        }, 0);
+      },
       dropdownItemsChanged: function(){
+      
       },
       _getViewMenuItemsData:function(e){
           var self = this;
           let responseData = e.detail.__data__.response;
+          
           if(responseData){
             this._generateDataForDropdownContent(responseData);
           }
       },
       _generateDataForDropdownContent: function(responseData){
-        this.dropdownItems = responseData.map(function(obj, index){
+        let appName = responseData.appName;
+        let menuItems = responseData.menuItems;
+
+        this.appName = responseData.appName;
+        
+        this.dropdownItems = menuItems.map(function(obj, index){
             let formattedObj = {
              "key": (index + 1).toString(),
              "val": obj.label,
              "path": obj.path,
-             "state": obj.state
+             "state": obj.state,
+             "appName": appName,
+             "default": obj.default
             };
             return formattedObj;
           });
@@ -73,10 +85,6 @@
 
         var idx = this._getSelectedViewIndex(this.dropdownItems, selectedView);
 
-        // if(idx > -1){
-        //   this._navigateToURL(this.dropdownItems[idx]);
-        // }
-
         if(idx > -1){
           this._emitDropDownItemChangedEvent(this.dropdownItems[idx]);
         }
@@ -85,16 +93,9 @@
         return _.findIndex(dropdownItems, function(o) { return o.val == selectedView; });
       },
       _emitDropDownItemChangedEvent:function(selectedViewItem){
-          var evt = {};
+          let evt = {};
           evt.selectedViewItem = selectedViewItem;
           this.fire('viewDropdownItemChanged', evt);
-      },
-      _navigateToURL: function(selectedViewItem){
-          let originPath = window.location.href.split('/#');
-          if(originPath && originPath.length > 0){
-            let url = originPath[0] + selectedViewItem.path;
-            window.location.href = url;  
-          }
       }
 
   });
