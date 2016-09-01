@@ -19,6 +19,8 @@ class controller {
 
 	    self.navigateToSelectedView();
 
+	    self.updateViewsDisplayIfLocationChanges();
+
 	}); 
 
 	self.initContextBrowser = function(browser){
@@ -111,18 +113,22 @@ class controller {
     	if(viewMenuItems){
     		var currentAppName = viewMenuItems.appName;
     		var currentState = AppHubService.getState();
-
     		var preSelectedViewExists = false;
-
+    		
 	        if(currentState){
 	        	if(currentState.selectedViews){
 	        		
 	        		var appIdx = _.findIndex(currentState.selectedViews, function(o) { return o.appName == currentAppName; });	
-	        		//There's a PreSelected View for this App
+	        		//The Current App name is in CurrentState
 					if(appIdx > -1){
-						preSelectedViewExists = true;
-						pxDropDownElement.displayValue = currentState.selectedViews[appIdx].selectedView;
-						$state.go(currentState.selectedViews[appIdx].selectedState, {});
+						if(pxDropDownElement && pxDropDownElement.dropdownItems){
+							var dropdownIdx = _.findIndex(pxDropDownElement.dropdownItems, function(o) { return o.val === currentState.selectedViews[appIdx].selectedView; });	
+	        				if(dropdownIdx > -1){
+	        					preSelectedViewExists = true;
+	        					pxDropDownElement.displayValue = pxDropDownElement.dropdownItems[dropdownIdx].val;
+								$state.go(pxDropDownElement.dropdownItems[dropdownIdx].state, {});
+							}
+	        			}
 					}
 				}
 	        }
@@ -134,35 +140,13 @@ class controller {
 	};
 
 	self.navigateToSelectedView = function (){
-    	
-    	var currentState = AppHubService.getState();
     	var viewMenuItems = document.querySelector('view-menu-items');
-		
+
     	if(viewMenuItems){
     		viewMenuItems.addEventListener('selectedViewItemChanged', function(evt){
     			if(evt.detail){
 		    		if(evt.detail.selectedViewItem){
-
-		    			var appNameOfSelectedViewFoundInState = false;
-		    			
-		    			if(currentState){
-							if(currentState.selectedViews){								
-								var appIdx = _.findIndex(currentState.selectedViews, function(o) { return o.appName === evt.detail.selectedViewItem.appName; });
-								//The app state is already in SessionState, just update View value
-								if(appIdx > -1){
-									appNameOfSelectedViewFoundInState = true;
-									currentState.selectedViews = self.updateSelectedViewOfAMicroApp(currentState.selectedViews, appIdx, evt.detail);
-								}
-							}
-	                    }
-
-	                    if(!appNameOfSelectedViewFoundInState){
-	                    	if(!currentState){ currentState = {}; }
-					    	if(!currentState.selectedViews){ currentState.selectedViews = []; }
-					    	currentState.selectedViews = self.addNewMicroAppToState(currentState.selectedViews, evt.detail);
-	                    }
-
-		    			AppHubService.setState(currentState);
+		    			self.updateCurrentState(evt.detail.selectedViewItem.appName, evt.detail.selectedViewItem);
 		    			$state.go(evt.detail.selectedViewItem.state, {});
 		    		}
 		    	}
@@ -170,31 +154,85 @@ class controller {
     	}
 	};
 
+	self.updateCurrentState = function(appName, selectedViewItem){
+		var currentState = AppHubService.getState();
+		var appNameOfSelectedViewFoundInState = false;
+
+		if(currentState){
+			if(currentState.selectedViews){								
+				var appIdx = _.findIndex(currentState.selectedViews, function(o) { return o.appName === appName; });
+				//The app state is already in SessionState, just update View value
+				if(appIdx > -1){
+					appNameOfSelectedViewFoundInState = true;
+					currentState.selectedViews = self.updateSelectedViewOfAMicroApp(currentState.selectedViews, appIdx, selectedViewItem);
+				}
+			}
+        }
+        if(!appNameOfSelectedViewFoundInState){
+        	if(!currentState){ currentState = {}; }
+	    	if(!currentState.selectedViews){ currentState.selectedViews = []; }
+	    	currentState.selectedViews = self.addNewMicroAppToState(currentState.selectedViews, selectedViewItem);
+        }
+
+		AppHubService.setState(currentState);
+	};
+
     self.goToDefaultState = function(dropdownItems, pxDropdown){
     	if(dropdownItems && dropdownItems.length>0){
 
 			var defaultStateIdx = _.findIndex(dropdownItems, function(o) { return o.default === true; });
-
 			if(defaultStateIdx > -1){
 				pxDropdown.displayValue = dropdownItems[defaultStateIdx].val;
-				$state.go(dropdownItems[defaultStateIdx].state, {});
-				//push the new app into selected Views?	
+				self.updateCurrentState(dropdownItems[defaultStateIdx].appName, dropdownItems[defaultStateIdx]);
+	    		$state.go(dropdownItems[defaultStateIdx].state, {});
 			}
     	}
     };
 
-    self.updateSelectedViewOfAMicroApp = function(selectedViews, idx, eventDetail){
-    	selectedViews[idx].appName = eventDetail.selectedViewItem.appName;
-		selectedViews[idx].selectedState = eventDetail.selectedViewItem.state;
-		selectedViews[idx].selectedView = eventDetail.selectedViewItem.val;
+    self.updateViewsDisplayIfLocationChanges = function(){
+    	window.addEventListener("hashchange",function(event){
+    		self.locationHashChanged(event);
+    	});
+    };
+
+    self.locationHashChanged = function(event){
+    	var viewMenuItems = document.querySelector('view-menu-items');
+		var pxDropdown = document.querySelector("#pxDropdown");
+		var locationHashIdx = -1;
+		var locationHash = '';
+
+		if(window.location){
+			if(window.location.hash){
+			  locationHash = '/' + window.location.hash;
+			}
+		}
+
+		if(viewMenuItems){
+			if(viewMenuItems.dropdownItems){
+				locationHashIdx = _.findIndex(viewMenuItems.dropdownItems, function(o){ return o.path === locationHash });
+				if(locationHashIdx > -1){
+	    			if(pxDropdown){
+	    				pxDropdown.displayValue = viewMenuItems.dropdownItems[locationHashIdx].val;
+	    				self.updateCurrentState(viewMenuItems.dropdownItems[locationHashIdx].appName, viewMenuItems.dropdownItems[locationHashIdx]);
+	    			}
+	    		}
+			}
+		}
+
+	};
+
+    self.updateSelectedViewOfAMicroApp = function(selectedViews, idx, selectedViewItem){
+    	selectedViews[idx].appName = selectedViewItem.appName;
+		selectedViews[idx].selectedState = selectedViewItem.state;
+		selectedViews[idx].selectedView = selectedViewItem.val;
 		return selectedViews;
     };
 
-    self.addNewMicroAppToState = function(selectedViews, eventDetail){
+    self.addNewMicroAppToState = function(selectedViews, selectedViewItem){
     	var microAppState = {
-		  'appName': eventDetail.selectedViewItem.appName,
-	      'selectedState': eventDetail.selectedViewItem.state,
-	      'selectedView': eventDetail.selectedViewItem.val
+		  'appName': selectedViewItem.appName,
+	      'selectedState': selectedViewItem.state,
+	      'selectedView': selectedViewItem.val
 	    };
 	    selectedViews.push(microAppState);
 	    return selectedViews;

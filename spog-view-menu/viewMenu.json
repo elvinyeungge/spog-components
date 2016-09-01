@@ -15,7 +15,7 @@
   },
   {
     "label": "Order",
-    "path": "/#/order/",
+    "path": "/#/order",
     "state": "order",
     "default": false
   }
