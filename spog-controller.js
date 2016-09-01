@@ -15,16 +15,14 @@ class controller {
 			self.initContextBrowser(colBrowser);
 		}
 
-		self.updateStyleIfNoContextBrowser(colBrowser);
-
-	    self.defaultToPreSelectedView();
+		self.defaultToPreSelectedView();
 
 	    self.navigateToSelectedView();
-	}); //eo ready
+
+	}); 
 
 	self.initContextBrowser = function(browser){
-		
-	    //initial context call for first column
+		//initial context call for first column
 	    $http.get('contextbrowser/api/allInstances?parent=null')
 	        .then(function(response){
 	            if(response.data.length>0){
@@ -111,15 +109,15 @@ class controller {
 		var pxDropDownElement = document.querySelector("#pxDropdown");
 						
     	if(viewMenuItems){
-    		let currentAppName = viewMenuItems.appName;
-    		let currentState = AppHubService.getState();
+    		var currentAppName = viewMenuItems.appName;
+    		var currentState = AppHubService.getState();
 
-    		let preSelectedViewExists = false;
+    		var preSelectedViewExists = false;
 
 	        if(currentState){
 	        	if(currentState.selectedViews){
 	        		
-	        		let appIdx = _.findIndex(currentState.selectedViews, function(o) { return o.appName == currentAppName; });	
+	        		var appIdx = _.findIndex(currentState.selectedViews, function(o) { return o.appName == currentAppName; });	
 	        		//There's a PreSelected View for this App
 					if(appIdx > -1){
 						preSelectedViewExists = true;
@@ -135,21 +133,21 @@ class controller {
 	    }
 	};
 
-    self.navigateToSelectedView = function (){
+	self.navigateToSelectedView = function (){
     	
-    	let currentState = AppHubService.getState();
+    	var currentState = AppHubService.getState();
     	var viewMenuItems = document.querySelector('view-menu-items');
 		
     	if(viewMenuItems){
-    		viewMenuItems.addEventListener('viewDropdownItemChanged', function(evt){
-		    	if(evt.detail){
+    		viewMenuItems.addEventListener('selectedViewItemChanged', function(evt){
+    			if(evt.detail){
 		    		if(evt.detail.selectedViewItem){
 
-		    			let appNameOfSelectedViewFoundInState = false;
+		    			var appNameOfSelectedViewFoundInState = false;
 		    			
 		    			if(currentState){
 							if(currentState.selectedViews){								
-								let appIdx = _.findIndex(currentState.selectedViews, function(o) { return o.appName === evt.detail.selectedViewItem.appName; });
+								var appIdx = _.findIndex(currentState.selectedViews, function(o) { return o.appName === evt.detail.selectedViewItem.appName; });
 								//The app state is already in SessionState, just update View value
 								if(appIdx > -1){
 									appNameOfSelectedViewFoundInState = true;
@@ -168,14 +166,14 @@ class controller {
 		    			$state.go(evt.detail.selectedViewItem.state, {});
 		    		}
 		    	}
-		    });
+		    }, false);
     	}
 	};
 
     self.goToDefaultState = function(dropdownItems, pxDropdown){
     	if(dropdownItems && dropdownItems.length>0){
 
-			let defaultStateIdx = _.findIndex(dropdownItems, function(o) { return o.default === true; });
+			var defaultStateIdx = _.findIndex(dropdownItems, function(o) { return o.default === true; });
 
 			if(defaultStateIdx > -1){
 				pxDropdown.displayValue = dropdownItems[defaultStateIdx].val;
@@ -193,7 +191,7 @@ class controller {
     };
 
     self.addNewMicroAppToState = function(selectedViews, eventDetail){
-    	let microAppState = {
+    	var microAppState = {
 		  'appName': eventDetail.selectedViewItem.appName,
 	      'selectedState': eventDetail.selectedViewItem.state,
 	      'selectedView': eventDetail.selectedViewItem.val
@@ -201,28 +199,6 @@ class controller {
 	    selectedViews.push(microAppState);
 	    return selectedViews;
     };
-
-    self.updateStyleIfNoContextBrowser = function(colBrowser){
-		if(!colBrowser){
-	    	let dropDownContainer =  document.querySelector('#pxDropdownContainer');
-	    	dropDownContainer.style.top = "2px";
-			dropDownContainer.style.marginBottom = "10px";
-		}
-
-		let dropcell = document.querySelector('#dropcell');
-		if(dropcell){
-			dropcell.style.textAlign = "center";
-		    dropcell.style.width = "100%";
-		    dropcell.style.backgroundColor= "white";
-		    dropcell.style.borderRadius= "3px";
-		    dropcell.style.cursor= "pointer";
-		}
-	};
-
-	function recursiveAddChildren(currentRoot){
-	    return null;
-	};
-
   }
 }
 

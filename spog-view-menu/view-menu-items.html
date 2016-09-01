@@ -16,7 +16,7 @@
           <px-dropdown 
           id="pxDropdown"
           display-value="Views"
-          on-tap="_dropdownMenuItemChanged">
+          on-tap="_selectedViewChanged">
           <px-dropdown-content 
             items="{{dropdownItems}}"
             class="px-dropdown-content"
@@ -41,63 +41,85 @@
         appName: ''
       },
       ready: function() {
-
         this.async(function() {
+
           this.$.getViewMenuItems.url= "nav/viewMenu.json";
           this.$.getViewMenuItems.generateRequest();
 
+          var colBrowser = document.querySelector('px-context-browser');
+          if(!colBrowser){
+            this._updateStyleIfNoContextBrowser();
+          }
+
+          this._setStyle();
         }, 0);
       },
       attached: function(){
         this.async(function(){
-          
+
         }, 0);
       },
       dropdownItemsChanged: function(){
-      
       },
-      _getViewMenuItemsData:function(e){
-          var self = this;
-          let responseData = e.detail.__data__.response;
-          
-          if(responseData){
-            this._generateDataForDropdownContent(responseData);
-          }
+      _selectedViewChanged: function(evt) {
+        var selectedView = this.$.pxDropdown.displayValue;
+        
+        var idx = this._getSelectedViewIndex(this.dropdownItems, selectedView);
+        if(idx > -1){
+          this._emitSelectedViewChangedEvent(this.dropdownItems[idx]);
+        }
+      },
+     _emitSelectedViewChangedEvent: function(selectedViewItem){
+        var viewMenuItems = document.querySelector('view-menu-items');
+        
+        var evt = {};
+        evt.selectedViewItem = selectedViewItem;
+        if(viewMenuItems){
+          viewMenuItems.fire('selectedViewItemChanged', evt);
+        }
+      },
+      _getViewMenuItemsData: function(e){
+        var self = this;
+        var responseData = e.detail.__data__.response;
+        
+        if(responseData){
+          this._generateDataForDropdownContent(responseData);
+        }
       },
       _generateDataForDropdownContent: function(responseData){
-        let appName = responseData.appName;
-        let menuItems = responseData.menuItems;
+        var appName = responseData.appName;
+        var menuItems = responseData.menuItems;
 
-        this.appName = responseData.appName;
-        
+        this.appName = responseData.appName;        
         this.dropdownItems = menuItems.map(function(obj, index){
-            let formattedObj = {
-             "key": (index + 1).toString(),
-             "val": obj.label,
-             "path": obj.path,
-             "state": obj.state,
-             "appName": appName,
-             "default": obj.default
-            };
-            return formattedObj;
-          });
-      },
-      _dropdownMenuItemChanged: function(evt) {
-        let selectedView = this.$.pxDropdown.displayValue;
-
-        var idx = this._getSelectedViewIndex(this.dropdownItems, selectedView);
-
-        if(idx > -1){
-          this._emitDropDownItemChangedEvent(this.dropdownItems[idx]);
-        }
+          var formattedObj = {
+           "key": (index + 1).toString(),
+           "val": obj.label,
+           "path": obj.path,
+           "state": obj.state,
+           "appName": appName,
+           "default": obj.default
+          };
+          return formattedObj;
+        });
       },
       _getSelectedViewIndex: function(dropdownItems, selectedView){
         return _.findIndex(dropdownItems, function(o) { return o.val == selectedView; });
       },
-      _emitDropDownItemChangedEvent:function(selectedViewItem){
-          let evt = {};
-          evt.selectedViewItem = selectedViewItem;
-          this.fire('viewDropdownItemChanged', evt);
+      _setStyle: function(){   
+        var triggerElement = document.querySelector('#dropcell px-dropdown-chevron #trigger');
+        if(triggerElement){
+          var triggerChildren = triggerElement.children;
+          if(triggerChildren && triggerChildren.length > 0){
+              var ironIcon = triggerChildren[0];
+              ironIcon.icon="polymer-font-awesome:fa-caret-down";
+          }
+        }
+      },
+      _updateStyleIfNoContextBrowser: function(){
+        var viewMenuItems =  document.querySelector('view-menu-items');
+        viewMenuItems.style.top = "2px";
+        viewMenuItems.style.marginBottom = "10px";
       }
 
   });
