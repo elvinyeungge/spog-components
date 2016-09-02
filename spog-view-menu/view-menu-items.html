@@ -42,13 +42,14 @@
       },
       ready: function() {
         this.async(function() {
-
           this.$.getViewMenuItems.url= "nav/viewMenu.json";
           this.$.getViewMenuItems.generateRequest();
 
           var colBrowser = document.querySelector('px-context-browser');
           if(!colBrowser){
             this._updateStyleIfNoContextBrowser();
+          }else{
+            this._setContextBrowserStyle(colBrowser);
           }
 
           this._setStyle();
@@ -56,7 +57,7 @@
       },
       attached: function(){
         this.async(function(){
-
+          this._defaultToPreSelectedView();          
         }, 0);
       },
       dropdownItemsChanged: function(){
@@ -71,7 +72,6 @@
       },
      _emitSelectedViewChangedEvent: function(selectedViewItem){
         var viewMenuItems = document.querySelector('view-menu-items');
-        
         var evt = {};
         evt.selectedViewItem = selectedViewItem;
         if(viewMenuItems){
@@ -81,15 +81,14 @@
       _getViewMenuItemsData: function(e){
         var self = this;
         var responseData = e.detail.__data__.response;
-        
         if(responseData){
           this._generateDataForDropdownContent(responseData);
+
         }
       },
       _generateDataForDropdownContent: function(responseData){
         var appName = responseData.appName;
         var menuItems = responseData.menuItems;
-
         this.appName = responseData.appName;        
         this.dropdownItems = menuItems.map(function(obj, index){
           var formattedObj = {
@@ -106,7 +105,7 @@
       _getSelectedViewIndex: function(dropdownItems, selectedView){
         return _.findIndex(dropdownItems, function(o) { return o.val == selectedView; });
       },
-      _setStyle: function(){   
+      _setStyle: function(){
         var triggerElement = document.querySelector('#dropcell px-dropdown-chevron #trigger');
         if(triggerElement){
           var triggerChildren = triggerElement.children;
@@ -116,11 +115,104 @@
           }
         }
       },
+      _setContextBrowserStyle: function(colBrowser){
+        colBrowser.style.height = "60px";
+      },
       _updateStyleIfNoContextBrowser: function(){
         var viewMenuItems =  document.querySelector('view-menu-items');
-        viewMenuItems.style.top = "2px";
+        viewMenuItems.style.top = "10px";
         viewMenuItems.style.marginBottom = "10px";
-      }
+      },
+      _defaultToPreSelectedView:function(){
+        var viewMenuItems = document.querySelector('view-menu-items');
+        var pxDropDownElement = document.querySelector("#pxDropdown");
+        var appIdx = -1;
+        var dropdownIdx = -1;
 
+        if(viewMenuItems){
+          var currentAppName = viewMenuItems.appName;
+          var currentState = JSON.parse(window.sessionStorage.getItem('_apphub:state'));
+          var preSelectedViewExists = false;
+
+          if(currentState){
+            if(currentState.selectedViews){    
+          
+              appIdx = _.findIndex(currentState.selectedViews, function(o) { return o.appName === currentAppName; });
+              if(appIdx > -1){
+                if(pxDropDownElement && this.dropdownItems){
+
+                  dropdownIdx = _.findIndex(this.dropdownItems, function(o) { return o.val === currentState.selectedViews[appIdx].selectedView; });
+                  if(dropdownIdx > -1){
+                    preSelectedViewExists = true;
+                    pxDropDownElement.displayValue = this.dropdownItems[dropdownIdx].val;
+                    var url =  window.location.origin + window.location.pathname + this.dropdownItems[dropdownIdx].path.slice(1);
+                    window.location = url;
+                  }
+                }
+              }
+            }
+          }
+          if(!preSelectedViewExists){
+            if(this.dropdownItems && pxDropDownElement){
+                this._goToDefaultState(this.dropdownItems, pxDropDownElement); 
+            }
+          }
+        }
+      },
+      _goToDefaultState: function(dropdownItems, pxDropdown){
+        if(dropdownItems && dropdownItems.length>0){
+          var defaultStateIdx = _.findIndex(dropdownItems, function(o) { return o.default === true; });
+          if(defaultStateIdx > -1){
+            pxDropdown.displayValue = dropdownItems[defaultStateIdx].val;
+            debugger;
+            var url =  window.location.origin + window.location.pathname + dropdownItems[defaultStateIdx].path.slice(1);
+            window.location = url;
+
+            this._updateCurrentState(dropdownItems[defaultStateIdx].appName, dropdownItems[defaultStateIdx]);
+            
+          }
+        }
+      },
+      _updateCurrentState: function(appName, selectedViewItem){
+        var sessionState = window.sessionStorage.getItem('_apphub:state');
+        var currentState = {};
+        
+        if(sessionState){
+          currentState = JSON.parse(sessionState);
+        }
+
+        var appNameOfSelectedViewFoundInState = false;
+        if(currentState){
+          if(currentState.selectedViews){               
+            var appIdx = _.findIndex(currentState.selectedViews, function(o) { return o.appName === appName; });
+            //The app state is already in SessionState, just update View value
+            if(appIdx > -1){
+              appNameOfSelectedViewFoundInState = true;
+              currentState.selectedViews = this._updateSelectedViewOfAMicroApp(currentState.selectedViews, appIdx, selectedViewItem);
+            }
+          }
+        }
+        if(!appNameOfSelectedViewFoundInState){
+          if(!currentState){ currentState = {}; }
+          if(!currentState.selectedViews){ currentState.selectedViews = []; }
+          currentState.selectedViews = this._addNewMicroAppToState(currentState.selectedViews, selectedViewItem);
+        }
+        window.sessionStorage.setItem('_apphub:state', currentState);
+      },
+      _updateSelectedViewOfAMicroApp:function(selectedViews, idx, selectedViewItem){
+        selectedViews[idx].appName = selectedViewItem.appName;
+        selectedViews[idx].selectedState = selectedViewItem.state;
+        selectedViews[idx].selectedView = selectedViewItem.val;
+        return selectedViews;
+      },
+      _addNewMicroAppToState:function(selectedViews, selectedViewItem){
+        var microAppState = {
+        'appName': selectedViewItem.appName,
+          'selectedState': selectedViewItem.state,
+          'selectedView': selectedViewItem.val
+        };
+        selectedViews.push(microAppState);
+        return selectedViews;
+      }
   });
 </script>

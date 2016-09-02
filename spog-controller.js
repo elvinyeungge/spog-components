@@ -1,11 +1,11 @@
 import angular from 'angular';
 class controller {
 
-  constructor($http, $state, $q, $rootScope, AppHubService){
-  	this.init($http, $state, $q, $rootScope, AppHubService);
+  constructor($http, $state, $q, $rootScope, $scope, AppHubService){
+  	this.init($http, $state, $q, $rootScope, $scope, AppHubService);
   }
 
-  init($http, $state, $q, $rootScope, AppHubService){
+  init($http, $state, $q, $rootScope, $scope, AppHubService){
   	var self = this;
 	
 	angular.element(document).ready(function() {
@@ -14,14 +14,13 @@ class controller {
 	    if(colBrowser){
 			self.initContextBrowser(colBrowser);
 		}
-
 		self.defaultToPreSelectedView();
 
 	    self.navigateToSelectedView();
 
 	    self.updateViewsDisplayIfLocationChanges();
-
 	}); 
+
 
 	self.initContextBrowser = function(browser){
 		//initial context call for first column
@@ -107,10 +106,10 @@ class controller {
 	};
 
 	self.defaultToPreSelectedView = function (){ 
-		var viewMenuItems = document.querySelector('view-menu-items');
+		var viewMenuItems = document.getElementsByTagName('view-menu-items')[0] ||  document.querySelector('view-menu-items');
 		var pxDropDownElement = document.querySelector("#pxDropdown");
-						
-    	if(viewMenuItems){
+
+		if(viewMenuItems){
     		var currentAppName = viewMenuItems.appName;
     		var currentState = AppHubService.getState();
     		var preSelectedViewExists = false;
@@ -121,19 +120,18 @@ class controller {
 	        		var appIdx = _.findIndex(currentState.selectedViews, function(o) { return o.appName == currentAppName; });	
 	        		//The Current App name is in CurrentState
 					if(appIdx > -1){
-						if(pxDropDownElement && pxDropDownElement.dropdownItems){
-							var dropdownIdx = _.findIndex(pxDropDownElement.dropdownItems, function(o) { return o.val === currentState.selectedViews[appIdx].selectedView; });	
+						if(pxDropDownElement && viewMenuItems.dropdownItems){
+							var dropdownIdx = _.findIndex(viewMenuItems.dropdownItems, function(o) { return o.val === currentState.selectedViews[appIdx].selectedView; });	
 	        				if(dropdownIdx > -1){
 	        					preSelectedViewExists = true;
-	        					pxDropDownElement.displayValue = pxDropDownElement.dropdownItems[dropdownIdx].val;
-								$state.go(pxDropDownElement.dropdownItems[dropdownIdx].state, {});
+	        					pxDropDownElement.displayValue = viewMenuItems.dropdownItems[dropdownIdx].val;
+								$state.go(viewMenuItems.dropdownItems[dropdownIdx].state, {});
 							}
 	        			}
 					}
 				}
 	        }
-
-			if(!preSelectedViewExists){
+	        if(!preSelectedViewExists){
 				self.goToDefaultState(viewMenuItems.dropdownItems, pxDropDownElement);
 			}
 	    }
@@ -141,17 +139,15 @@ class controller {
 
 	self.navigateToSelectedView = function (){
     	var viewMenuItems = document.querySelector('view-menu-items');
-
-    	if(viewMenuItems){
-    		viewMenuItems.addEventListener('selectedViewItemChanged', function(evt){
-    			if(evt.detail){
-		    		if(evt.detail.selectedViewItem){
-		    			self.updateCurrentState(evt.detail.selectedViewItem.appName, evt.detail.selectedViewItem);
-		    			$state.go(evt.detail.selectedViewItem.state, {});
-		    		}
-		    	}
-		    }, false);
-    	}
+    	window.addEventListener('selectedViewItemChanged', function(evt){
+			if(evt.detail){
+	    		if(evt.detail.selectedViewItem){
+	    			self.updateCurrentState(evt.detail.selectedViewItem.appName, evt.detail.selectedViewItem);
+	    			$state.go(evt.detail.selectedViewItem.state, {});
+	    		}
+	    	}
+	    }, false);
+    	
 	};
 
 	self.updateCurrentState = function(appName, selectedViewItem){
@@ -194,7 +190,7 @@ class controller {
     		self.locationHashChanged(event);
     	});
     };
-
+    
     self.locationHashChanged = function(event){
     	var viewMenuItems = document.querySelector('view-menu-items');
 		var pxDropdown = document.querySelector("#pxDropdown");
@@ -215,6 +211,8 @@ class controller {
 	    				pxDropdown.displayValue = viewMenuItems.dropdownItems[locationHashIdx].val;
 	    				self.updateCurrentState(viewMenuItems.dropdownItems[locationHashIdx].appName, viewMenuItems.dropdownItems[locationHashIdx]);
 	    			}
+	    		}else{
+	    			self.defaultToPreSelectedView();
 	    		}
 			}
 		}
@@ -241,6 +239,6 @@ class controller {
 }
 
 // Strict DI for minification (order is important)
-controller.$inject = ['$http', '$state', '$q', '$rootScope', 'AppHubService'];
+controller.$inject = ['$http', '$state', '$q', '$rootScope', '$scope', 'AppHubService'];
 
 export default controller;
