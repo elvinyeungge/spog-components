@@ -164,7 +164,6 @@
           var defaultStateIdx = _.findIndex(dropdownItems, function(o) { return o.default === true; });
           if(defaultStateIdx > -1){
             pxDropdown.displayValue = dropdownItems[defaultStateIdx].val;
-            debugger;
             var url =  window.location.origin + window.location.pathname + dropdownItems[defaultStateIdx].path.slice(1);
             window.location = url;
 

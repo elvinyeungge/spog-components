@@ -106,7 +106,6 @@ class controller {
 	};
 
 	self.defaultToPreSelectedView = function (){ 
-		debugger;
 		var viewMenuItems = document.getElementsByTagName('view-menu-items')[0] ||  document.querySelector('view-menu-items');
 		var pxDropDownElement = document.querySelector("#pxDropdown");
 
