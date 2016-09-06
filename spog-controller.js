@@ -20,7 +20,7 @@ class controller {
 
 	    self.updateViewsDisplayIfLocationChanges();
 	}); 
-
+	
 
 	self.initContextBrowser = function(browser){
 		//initial context call for first column
@@ -106,6 +106,7 @@ class controller {
 	};
 
 	self.defaultToPreSelectedView = function (){ 
+		debugger;
 		var viewMenuItems = document.getElementsByTagName('view-menu-items')[0] ||  document.querySelector('view-menu-items');
 		var pxDropDownElement = document.querySelector("#pxDropdown");
 
@@ -205,7 +206,7 @@ class controller {
 
 		if(viewMenuItems){
 			if(viewMenuItems.dropdownItems){
-				locationHashIdx = _.findIndex(viewMenuItems.dropdownItems, function(o){ return o.path === locationHash });
+				locationHashIdx = _.findIndex(viewMenuItems.dropdownItems, function(o){ return o.path.split("/")[2] === locationHash.split("/")[2] });
 				if(locationHashIdx > -1){
 	    			if(pxDropdown){
 	    				pxDropdown.displayValue = viewMenuItems.dropdownItems[locationHashIdx].val;
