@@ -4,7 +4,7 @@ var supportedLocales = ['en','en-US'];
 var defaultLocale = 'en';
 var localeScript = document.createElement("script");
 localeScript.type = "application/javascript";
-var scriptName ="modules/wip/i18n/wip-";
+var scriptName ="modules/i18n/wip-";
 //locale = 'te-st';
 if(!supportedLocales.includes(locale)){
   if(supportedLocales.includes(locale.substring(2))){
