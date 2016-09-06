@@ -20,6 +20,7 @@
   ],
   "dependencies": {
     "spog-context-browser": "https://github.com/bms-spog/spog-px-context-browser.git#1.1.0",
-    "px-dropdown": "https://github.com/PredixDev/px-dropdown.git"
+    "px-dropdown": "https://github.com/PredixDev/px-dropdown.git",
+    "intl-messageformat":"https://github.com/yahoo/intl-messageformat.git"
   }
 }
