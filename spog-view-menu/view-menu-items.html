@@ -44,12 +44,12 @@
         this.async(function() {
           this.$.getViewMenuItems.url= "nav/viewMenu.json";
           this.$.getViewMenuItems.generateRequest();
-
           var colBrowser = document.querySelector('px-context-browser');
           if(!colBrowser){
             this._updateStyleIfNoContextBrowser();
           }else{
             this._setContextBrowserStyle(colBrowser);
+            this._changeViewsZIndex(colBrowser);
           }
 
           this._setStyle();
@@ -116,6 +116,21 @@
       },
       _setContextBrowserStyle: function(colBrowser){
         colBrowser.style.height = "60px";
+      },
+      _changeViewsZIndex: function(colBrowser){
+        var viewMenuItems =  document.querySelector('view-menu-items');
+        
+        window.addEventListener('contextBrowserOpening', function(event){
+          if(viewMenuItems){
+            viewMenuItems.style.zIndex = "-1";
+          }
+        });
+
+        window.addEventListener('contextBrowserClosing', function(event){
+          if(viewMenuItems){
+            viewMenuItems.style.zIndex = "0";
+          }
+        });
       },
       _updateStyleIfNoContextBrowser: function(){
         var viewMenuItems =  document.querySelector('view-menu-items');
