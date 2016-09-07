@@ -219,7 +219,7 @@ class controller {
 			}else{
 				$timeout(function() {
 					self.defaultToPreSelectedView();
-				}, 1300);
+				}, 3000);
 			}
 		}else{
 			self.locationHashChanged(event, toState,  toParams, fromState, fromParams);
