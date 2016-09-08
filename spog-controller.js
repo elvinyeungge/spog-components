@@ -1,11 +1,11 @@
 import angular from 'angular';
 class controller {
 
-  constructor($http, $state, $q, $rootScope, $scope, $timeout,AppHubService){
-  	this.init($http, $state, $q, $rootScope, $scope, $timeout, AppHubService);
+  constructor($http, $state, $q, $rootScope, $scope, $timeout, $interval, AppHubService){
+  	this.init($http, $state, $q, $rootScope, $scope, $timeout, $interval, AppHubService);
   }
 
-  init($http, $state, $q, $rootScope, $scope, $timeout, AppHubService){
+  init($http, $state, $q, $rootScope, $scope, $timeout, $interval, AppHubService){
   	var self = this;
 	
 	angular.element(document).ready(function() {
@@ -121,16 +121,19 @@ class controller {
 	        				if(dropdownIdx > -1){
 	        					preSelectedViewExists = true;
 	        					pxDropDownElement.displayValue = viewMenuItems.dropdownItems[dropdownIdx].val;
+
 								$state.go(viewMenuItems.dropdownItems[dropdownIdx].state, {});
+
+	        					$interval.cancel(self.promise);
 							}
 	        			}
 					}
 				}
 	        }
 	        if(!preSelectedViewExists){
-				self.goToDefaultState(viewMenuItems.dropdownItems, pxDropDownElement);
+	        	self.goToDefaultState(viewMenuItems.dropdownItems, pxDropDownElement);
 			}
-	    }
+        }
 	};
 
 	self.navigateToSelectedView = function (){
@@ -175,9 +178,11 @@ class controller {
 			var defaultStateIdx = _.findIndex(dropdownItems, function(o) { return o.default === true; });
 			if(defaultStateIdx > -1){
 				pxDropdown.displayValue = dropdownItems[defaultStateIdx].val;
+
 				//self.updateCurrentState(dropdownItems[defaultStateIdx].appName, dropdownItems[defaultStateIdx]);
 	    		$state.go(dropdownItems[defaultStateIdx].state, {});
-			}
+	    		$interval.cancel(self.promise);
+	        }
     	}
     };
 
@@ -186,9 +191,9 @@ class controller {
     		self.locationHashChanged(event);
     	});
     };
-    
-    self.locationHashChanged = function(event, toState,  toParams, fromState, fromParams){
-    	var viewMenuItems = document.querySelector('view-menu-items');
+
+	self.locationHashChanged = function(event, toState,  toParams, fromState, fromParams){
+		var viewMenuItems = document.querySelector('view-menu-items');
 		var pxDropdown = document.querySelector("#pxDropdown");
 		var locationHashIdx = -1;
 		var locationHash = '';
@@ -199,6 +204,7 @@ class controller {
 				if(locationHashIdx > -1){
 	    			if(pxDropdown){
 	    				pxDropdown.displayValue = viewMenuItems.dropdownItems[locationHashIdx].val;
+						$interval.cancel(self.promise);
 	    				self.updateCurrentState(viewMenuItems.dropdownItems[locationHashIdx].appName, viewMenuItems.dropdownItems[locationHashIdx]);
 	    			}
 	    		}
@@ -208,7 +214,13 @@ class controller {
 	};
 
 	$rootScope.$on('$stateChangeSuccess', function (event, toState, toParams, fromState, fromParams) {
+		if(self.promise){
+			$interval.cancel(self.promise);
+		}
+
+		var viewMenuItems = document.getElementsByTagName('view-menu-items')[0] ||  document.querySelector('view-menu-items');
 		var changeInMicroApp = false;
+
 		if(fromState.name === ""){
 			changeInMicroApp = true;
 		}
@@ -217,14 +229,23 @@ class controller {
 			if(window.chrome){
 				self.defaultToPreSelectedView();
 			}else{
-				$timeout(function() {
-					self.defaultToPreSelectedView();
-				}, 3000);
+				self.checkIfViewMenuItems();		
 			}
 		}else{
 			self.locationHashChanged(event, toState,  toParams, fromState, fromParams);
 		}
     });
+
+    self.checkIfViewMenuItems = function() {
+    	self.promise = $interval(function() {
+    		var viewMenuItems = document.getElementsByTagName('view-menu-items')[0] ||  document.querySelector('view-menu-items');		
+        	if(viewMenuItems){
+            	self.defaultToPreSelectedView();
+	        }else{
+	        	self.checkIfViewMenuItems();
+	        }
+		}, 500);
+    };
 
     self.updateSelectedViewOfAMicroApp = function(selectedViews, idx, selectedViewItem){
     	selectedViews[idx].appName = selectedViewItem.appName;
@@ -242,10 +263,15 @@ class controller {
 	    selectedViews.push(microAppState);
 	    return selectedViews;
     };
+
+    $scope.$on('destroy', function(){
+    	$interval.cancel(self.promise);
+    });
+
   }
 }
 
 // Strict DI for minification (order is important)
-controller.$inject = ['$http', '$state', '$q', '$rootScope', '$scope', '$timeout', 'AppHubService'];
+controller.$inject = ['$http', '$state', '$q', '$rootScope', '$scope', '$timeout', '$interval', 'AppHubService'];
 
 export default controller;

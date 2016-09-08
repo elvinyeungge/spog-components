@@ -115,21 +115,30 @@
         }
       },
       _setContextBrowserStyle: function(colBrowser){
-        colBrowser.style.height = "60px";
+        var colBrowserContainer = document.querySelector('.column-browser-container');
+        if(colBrowserContainer){
+           //colBrowserContainer.style.height = "60px";  
+        }
       },
       _changeViewsZIndex: function(colBrowser){
         var viewMenuItems =  document.querySelector('view-menu-items');
+        var colBrowserContainerHeader = document.querySelector('.column-browser-container header');
         
         window.addEventListener('contextBrowserOpening', function(event){
           if(viewMenuItems){
             viewMenuItems.style.zIndex = "-1";
           }
+          // if(colBrowserContainerHeader){
+          //   colBrowserContainerHeader.style.paddingTop = "31px";
+          //   colBrowserContainerHeader.style.paddingBottom = "28px";
+          // }
         });
 
         window.addEventListener('contextBrowserClosing', function(event){
           if(viewMenuItems){
             viewMenuItems.style.zIndex = "0";
           }
+          
         });
       },
       _updateStyleIfNoContextBrowser: function(){
