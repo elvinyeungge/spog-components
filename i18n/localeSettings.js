@@ -1,20 +1,16 @@
 var locale = (window.navigator.languages) ? window.navigator.languages[0]
               : (window.navigator.userLanguage||window.navigator.language);//gets user's preffered language as dictated in settings
-var supportedLocales = ['en','en-US','es-ES', 'fr-FR'];
+var supportedLocales = ['en-US', 'fr-FR'];
 var defaultScript = 'modules/i18n/default.properties';
 var scriptName ="modules/i18n/";
 //locale = 'te-st';
 if(!supportedLocales.includes(locale)){
-  if(supportedLocales.includes(locale.substring(2))){
-    //set to generic locale e.g. en-US becomes en
-      locale = locale.substring(0,2);
-  } else{
-      scriptName = defaultScript;
-  }
+  scriptName = defaultScript;
+}else{
+  scriptName += locale;
+  scriptName = scriptName.toLowerCase();
+  scriptName +=  ".properties";
 }
-scriptName += locale;
-scriptName = scriptName.toLowerCase();
-scriptName +=  ".properties";
 
 var localeData;
 var xmlhttp =  new XMLHttpRequest();
