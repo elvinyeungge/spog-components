@@ -1,11 +1,11 @@
 import angular from 'angular';
 class controller {
 
-  constructor($http, $state, $q, $rootScope, $scope, AppHubService){
-  	this.init($http, $state, $q, $rootScope, $scope, AppHubService);
+  constructor($http, $state, $q, $rootScope, $scope, $timeout,AppHubService){
+  	this.init($http, $state, $q, $rootScope, $scope, $timeout, AppHubService);
   }
 
-  init($http, $state, $q, $rootScope, $scope, AppHubService){
+  init($http, $state, $q, $rootScope, $scope, $timeout, AppHubService){
   	var self = this;
 	
 	angular.element(document).ready(function() {
@@ -14,11 +14,7 @@ class controller {
 	    if(colBrowser){
 			self.initContextBrowser(colBrowser);
 		}
-		self.defaultToPreSelectedView();
-
-	    self.navigateToSelectedView();
-
-	    self.updateViewsDisplayIfLocationChanges();
+		self.navigateToSelectedView();
 	}); 
 	
 
@@ -179,7 +175,7 @@ class controller {
 			var defaultStateIdx = _.findIndex(dropdownItems, function(o) { return o.default === true; });
 			if(defaultStateIdx > -1){
 				pxDropdown.displayValue = dropdownItems[defaultStateIdx].val;
-				self.updateCurrentState(dropdownItems[defaultStateIdx].appName, dropdownItems[defaultStateIdx]);
+				//self.updateCurrentState(dropdownItems[defaultStateIdx].appName, dropdownItems[defaultStateIdx]);
 	    		$state.go(dropdownItems[defaultStateIdx].state, {});
 			}
     	}
@@ -191,33 +187,44 @@ class controller {
     	});
     };
     
-    self.locationHashChanged = function(event){
+    self.locationHashChanged = function(event, toState,  toParams, fromState, fromParams){
     	var viewMenuItems = document.querySelector('view-menu-items');
 		var pxDropdown = document.querySelector("#pxDropdown");
 		var locationHashIdx = -1;
 		var locationHash = '';
 
-		if(window.location){
-			if(window.location.hash){
-			  locationHash = '/' + window.location.hash;
-			}
-		}
-
 		if(viewMenuItems){
 			if(viewMenuItems.dropdownItems){
-				locationHashIdx = _.findIndex(viewMenuItems.dropdownItems, function(o){ return o.path.split("/")[2] === locationHash.split("/")[2] });
+				locationHashIdx = _.findIndex(viewMenuItems.dropdownItems, function(o){ return o.path.split("/")[2] === toState.name });
 				if(locationHashIdx > -1){
 	    			if(pxDropdown){
 	    				pxDropdown.displayValue = viewMenuItems.dropdownItems[locationHashIdx].val;
 	    				self.updateCurrentState(viewMenuItems.dropdownItems[locationHashIdx].appName, viewMenuItems.dropdownItems[locationHashIdx]);
 	    			}
-	    		}else{
-	    			self.defaultToPreSelectedView();
 	    		}
-			}
+	    	}
 		}
 
 	};
+
+	$rootScope.$on('$stateChangeSuccess', function (event, toState, toParams, fromState, fromParams) {
+		var changeInMicroApp = false;
+		if(fromState.name === ""){
+			changeInMicroApp = true;
+		}
+
+		if(changeInMicroApp){
+			if(window.chrome){
+				self.defaultToPreSelectedView();
+			}else{
+				$timeout(function() {
+					self.defaultToPreSelectedView();
+				}, 3000);
+			}
+		}else{
+			self.locationHashChanged(event, toState,  toParams, fromState, fromParams);
+		}
+    });
 
     self.updateSelectedViewOfAMicroApp = function(selectedViews, idx, selectedViewItem){
     	selectedViews[idx].appName = selectedViewItem.appName;
@@ -239,6 +246,6 @@ class controller {
 }
 
 // Strict DI for minification (order is important)
-controller.$inject = ['$http', '$state', '$q', '$rootScope', '$scope', 'AppHubService'];
+controller.$inject = ['$http', '$state', '$q', '$rootScope', '$scope', '$timeout', 'AppHubService'];
 
 export default controller;
