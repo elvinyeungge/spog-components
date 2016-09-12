@@ -20,7 +20,7 @@ class controller {
 
 	self.initContextBrowser = function(browser){
 		//initial context call for first column
-	    $http.get('contextbrowser/api/allInstances?parent=null')
+	    $http.get('contextbrowser/api/allInstances?components=BASIC&parent=null')
 	        .then(function(response){
 	            if(response.data.length>0){
 	                for(var ii=0;ii<response.data.length;ii++){
@@ -70,7 +70,7 @@ class controller {
 	        parent = node.uri;
 	    }
 	    //url to call to apm - parent comes from node. null returns enterprises
-	    var url = 'contextbrowser/api/allInstances?parent=' + parent;
+	    var url = 'contextbrowser/api/allInstances?components=BASIC&parent=' + parent;
 	    //call itself
 	    $http.get(url)
 	        .then(function(response){
