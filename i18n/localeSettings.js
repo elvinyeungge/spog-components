@@ -23,7 +23,7 @@ xmlhttp.onreadystatechange = function() {
     } else{
       localeData = parseProperties(xmlhttp.responseText);
       localeData['currentLocale'] = locale;
-      // console.log(properties);
+      console.log('Localized using ' + scriptName);
     }
   }
 };
