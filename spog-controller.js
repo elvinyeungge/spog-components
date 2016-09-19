@@ -8,19 +8,25 @@ class controller {
   init($http, $state, $q, $rootScope, $scope, $timeout, $interval, AppHubService){
   	var self = this;
 	
+	 	
 	angular.element(document).ready(function() {
 		var counter = 0;
-	    var colBrowser = document.querySelector('px-context-browser');
-	    if(colBrowser){
-			self.initContextBrowser(colBrowser);
-		}
+		self.addIntervalToInitiateContextBrowser = $interval(function() {
+			var colBrowser = document.querySelector('px-context-browser');
+		    if(colBrowser){
+				self.initContextBrowser(colBrowser);
+			}
+		}, 500);
+	    
 		self.navigateToSelectedView();
-	}); 
+	});
+	
 	
 
 	self.initContextBrowser = function(browser){
+		$interval.cancel(self.addIntervalToInitiateContextBrowser);
 		//initial context call for first column
-	    $http.get('contextbrowser/api/allInstances?components=BASIC&parent=null')
+	    $http.get('contextbrowser/api/allInstances?parent=null')
 	        .then(function(response){
 	            if(response.data.length>0){
 	                for(var ii=0;ii<response.data.length;ii++){
@@ -70,7 +76,7 @@ class controller {
 	        parent = node.uri;
 	    }
 	    //url to call to apm - parent comes from node. null returns enterprises
-	    var url = 'contextbrowser/api/allInstances?components=BASIC&parent=' + parent;
+	    var url = 'contextbrowser/api/allInstances?parent=' + parent;
 	    //call itself
 	    $http.get(url)
 	        .then(function(response){

@@ -115,9 +115,12 @@
         }
       },
       _setContextBrowserStyle: function(colBrowser){
-        var colBrowserContainer = document.querySelector('.column-browser-container');
-        if(colBrowserContainer){
-           //colBrowserContainer.style.height = "60px";  
+        var colBrowserBack = document.querySelector('#contextBrowser #back');
+        var headerSelectContext = document.querySelector('#contextBrowser #selectContext');
+        if(headerSelectContext && colBrowserBack){
+          colBrowserBack.style.height = "100%";
+          headerSelectContext.style.paddingTop = "14px";
+          headerSelectContext.style.paddingBottom = "8px";
         }
       },
       _changeViewsZIndex: function(colBrowser){
@@ -128,10 +131,6 @@
           if(viewMenuItems){
             viewMenuItems.style.zIndex = "-1";
           }
-          // if(colBrowserContainerHeader){
-          //   colBrowserContainerHeader.style.paddingTop = "31px";
-          //   colBrowserContainerHeader.style.paddingBottom = "28px";
-          // }
         });
 
         window.addEventListener('contextBrowserClosing', function(event){
