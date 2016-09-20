@@ -11,20 +11,26 @@ class controller {
 	 	
 	angular.element(document).ready(function() {
 		var counter = 0;
-		self.addIntervalToInitiateContextBrowser = $interval(function() {
-			var colBrowser = document.querySelector('px-context-browser');
-		    if(colBrowser){
-				self.initContextBrowser(colBrowser);
-			}
-		}, 500);
-	    
+		
+		if(!window.chrome){
+			self.intervalToFetchContextBrowser = $interval(function() {
+				self.fetchContextBrowser();	
+			}, 500, 20);
+		}else {
+			self.fetchContextBrowser();
+		}
 		self.navigateToSelectedView();
 	});
 	
-	
+	self.fetchContextBrowser = function(){
+		var colBrowser = document.querySelector('px-context-browser');
+		if(colBrowser){
+			self.initContextBrowser(colBrowser);
+		}
+	};
 
 	self.initContextBrowser = function(browser){
-		$interval.cancel(self.addIntervalToInitiateContextBrowser);
+		$interval.cancel(self.intervalToFetchContextBrowser);
 		//initial context call for first column
 	    $http.get('contextbrowser/api/allInstances?components=BASIC&parent=null')
 	        .then(function(response){
@@ -127,10 +133,8 @@ class controller {
 	        				if(dropdownIdx > -1){
 	        					preSelectedViewExists = true;
 	        					pxDropDownElement.displayValue = viewMenuItems.dropdownItems[dropdownIdx].val;
-
 								$state.go(viewMenuItems.dropdownItems[dropdownIdx].state, {});
-
-	        					$interval.cancel(self.promise);
+	        					$interval.cancel(self.intervalToFetchViewMenuItems);
 							}
 	        			}
 					}
@@ -152,7 +156,6 @@ class controller {
 	    		}
 	    	}
 	    }, false);
-    	
 	};
 
 	self.updateCurrentState = function(appName, selectedViewItem){
@@ -184,10 +187,8 @@ class controller {
 			var defaultStateIdx = _.findIndex(dropdownItems, function(o) { return o.default === true; });
 			if(defaultStateIdx > -1){
 				pxDropdown.displayValue = dropdownItems[defaultStateIdx].val;
-
-				//self.updateCurrentState(dropdownItems[defaultStateIdx].appName, dropdownItems[defaultStateIdx]);
-	    		$state.go(dropdownItems[defaultStateIdx].state, {});
-	    		$interval.cancel(self.promise);
+				$state.go(dropdownItems[defaultStateIdx].state, {});
+	    		$interval.cancel(self.intervalToFetchViewMenuItems);
 	        }
     	}
     };
@@ -210,23 +211,20 @@ class controller {
 				if(locationHashIdx > -1){
 	    			if(pxDropdown){
 	    				pxDropdown.displayValue = viewMenuItems.dropdownItems[locationHashIdx].val;
-						$interval.cancel(self.promise);
+						$interval.cancel(self.intervalToFetchViewMenuItems);
 	    				self.updateCurrentState(viewMenuItems.dropdownItems[locationHashIdx].appName, viewMenuItems.dropdownItems[locationHashIdx]);
 	    			}
 	    		}
 	    	}
 		}
-
 	};
 
 	$rootScope.$on('$stateChangeSuccess', function (event, toState, toParams, fromState, fromParams) {
-		if(self.promise){
-			$interval.cancel(self.promise);
+		if(self.intervalToFetchViewMenuItems){
+			$interval.cancel(self.intervalToFetchViewMenuItems);
 		}
 
-		var viewMenuItems = document.getElementsByTagName('view-menu-items')[0] ||  document.querySelector('view-menu-items');
 		var changeInMicroApp = false;
-
 		if(fromState.name === ""){
 			changeInMicroApp = true;
 		}
@@ -242,15 +240,17 @@ class controller {
 		}
     });
 
-    self.checkIfViewMenuItems = function() {
-    	self.promise = $interval(function() {
+	self.checkIfViewMenuItems = function() {
+    	self.intervalToFetchViewMenuItems = $interval(function() {
     		var viewMenuItems = document.getElementsByTagName('view-menu-items')[0] ||  document.querySelector('view-menu-items');		
         	if(viewMenuItems){
             	self.defaultToPreSelectedView();
-	        }else{
-	        	self.checkIfViewMenuItems();
 	        }
-		}, 500);
+	        // else{
+	        // 	debugger;
+	        // 	self.checkIfViewMenuItems();
+	        // }
+		}, 500, 20);
     };
 
     self.updateSelectedViewOfAMicroApp = function(selectedViews, idx, selectedViewItem){
@@ -271,7 +271,8 @@ class controller {
     };
 
     $scope.$on('destroy', function(){
-    	$interval.cancel(self.promise);
+    	$interval.cancel(self.intervalToFetchViewMenuItems);
+    	$interval.cancel(self.intervalToFetchContextBrowser);
     });
 
   }
