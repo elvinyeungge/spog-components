@@ -43,6 +43,21 @@ class controller {
 	                    response.data[ii]['isOpenable'] = true;
 	                }
 	                browser.browserContext=initialContext(response.data);
+	                var data = JSON.parse(window.sessionStorage.getItem('selectedIds'));
+			        var enterprise = data['enterprises'];
+			        setTimeout(function(){
+			          var span = document.querySelectorAll('span');
+			          for(var si=0; si < span.length; si++){
+			            var eventSpan = span[si].innerHTML;
+			            console.log("eventSpan", eventSpan);
+			            var eventName = enterprise.name;
+			            console.log('eventName',eventName);
+			            if(eventSpan == eventName){
+			              span[si].click();
+			              break;
+			            }
+			          }
+			      	},1000);
 	            }
 	        });
 
@@ -92,6 +107,30 @@ class controller {
 	                    response.data[ii]['identifier'] = node.identifier + ('a' + ii);
 	                    response.data[ii]['hasChildren'] = true;
 	                    response.data[ii]['isOpenable'] = true;
+	                }
+	                if(parent.includes("enterprises")){
+	                	var data = JSON.parse(window.sessionStorage.getItem('selectedIds'));
+				        var site = data['sites'];
+				        console.log("Data", data);
+		                setTimeout(function(){
+				          var span = document.querySelectorAll('span');
+				          for(var si=0; si < span.length; si++){
+				            var eventSpan = span[si].innerHTML;
+				            console.log("eventSpan", eventSpan);
+				            var eventName = site.name;
+				            console.log('eventName',eventName);
+				            if(eventSpan == eventName){
+				              console.log('condition to be true',span[si]);
+				              span[si].click();
+				              break;
+				            }
+				          }
+				      	},1000);
+	                }
+	                else{
+	                	var colBrowser = document.querySelector('px-context-browser');
+	                	colBrowser.querySelector('.openable').click();
+	                	colBrowser.querySelector('h1').click();
 	                }
 	            }
 
