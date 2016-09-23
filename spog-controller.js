@@ -43,21 +43,7 @@ class controller {
 	                    response.data[ii]['isOpenable'] = true;
 	                }
 	                browser.browserContext=initialContext(response.data);
-	                var data = JSON.parse(window.sessionStorage.getItem('selectedIds'));
-			        var enterprise = data['enterprises'];
-			        setTimeout(function(){
-			          var span = document.querySelectorAll('span');
-			          for(var si=0; si < span.length; si++){
-			            var eventSpan = span[si].innerHTML;
-			            console.log("eventSpan", eventSpan);
-			            var eventName = enterprise.name;
-			            console.log('eventName',eventName);
-			            if(eventSpan == eventName){
-			              span[si].click();
-			              break;
-			            }
-			          }
-			      	},1000);
+	                persistingContextBrowser('enterprises');
 	            }
 	        });
 
@@ -96,6 +82,7 @@ class controller {
 	    } else {
 	        parent = node.uri;
 	    }
+
 	    //url to call to apm - parent comes from node. null returns enterprises
 	    var url = 'contextbrowser/api/allInstances?components=BASIC&parent=' + parent;
 	    //call itself
@@ -103,29 +90,12 @@ class controller {
 	        .then(function(response){
 	            if(response.data.length>0){
 	                for(var ii=0;ii<response.data.length;ii++){
-	                    //add context-browser attributes
 	                    response.data[ii]['identifier'] = node.identifier + ('a' + ii);
 	                    response.data[ii]['hasChildren'] = true;
 	                    response.data[ii]['isOpenable'] = true;
 	                }
 	                if(parent.includes("enterprises")){
-	                	var data = JSON.parse(window.sessionStorage.getItem('selectedIds'));
-				        var site = data['sites'];
-				        console.log("Data", data);
-		                setTimeout(function(){
-				          var span = document.querySelectorAll('span');
-				          for(var si=0; si < span.length; si++){
-				            var eventSpan = span[si].innerHTML;
-				            console.log("eventSpan", eventSpan);
-				            var eventName = site.name;
-				            console.log('eventName',eventName);
-				            if(eventSpan == eventName){
-				              console.log('condition to be true',span[si]);
-				              span[si].click();
-				              break;
-				            }
-				          }
-				      	},1000);
+	                	persistingContextBrowser('sites');
 	                }
 	                else{
 	                	var colBrowser = document.querySelector('px-context-browser');
@@ -143,6 +113,23 @@ class controller {
 	        }); //eo http.get.then
 	    //don't forget to return the promise!
 	    return deferred.promise;
+	}
+	function persistingContextBrowser(val){
+		var data = JSON.parse(window.sessionStorage.getItem('selectedIds'));
+			if(data){
+			        var persistingContextBrowser = data[val];
+			        setTimeout(function(){
+			          var span = document.querySelectorAll('span');
+			          for(var si=0; si < span.length; si++){
+			            var eventSpan = span[si].innerHTML;
+			            var eventName = persistingContextBrowser.name;
+			            if(eventSpan == eventName){
+			              span[si].click();
+			              break;
+			            }
+			          }
+			      	},1000);
+			    }
 	}
 
 	function initialContext(data){
