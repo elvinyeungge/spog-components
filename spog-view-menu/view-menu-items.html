@@ -38,6 +38,10 @@
           default: [],
           observer: 'dropdownItemsChanged'
         },
+        isAdmin: {
+          type: Boolean,
+          default: false
+        },
         appName: ''
       },
       ready: function() {
@@ -85,19 +89,32 @@
 
         }
       },
+      _userIsAdmin: function () {
+        var featuresArray = window.nav.user.features;
+        if (featuresArray && featuresArray.includes("WIP Admin")) {
+            this.isAdmin = true;
+        }
+        else {
+            this.isAdmin = false;
+        }
+        return this.isAdmin;
+      },
       _generateDataForDropdownContent: function(responseData){
+        var isAdmin = this._userIsAdmin();
         var appName = responseData.appName;
         var menuItems = responseData.menuItems;
         this.appName = responseData.appName;        
         this.dropdownItems = menuItems.map(function(obj, index){
-          var formattedObj = {
-           "key": (index + 1).toString(),
-           "val": obj.label,
-           "path": obj.path,
-           "state": obj.state,
-           "appName": appName,
-           "default": obj.default
-          };
+          if(!obj.isAdmin || !isAdmin){
+            var formattedObj = {
+             "key": (index + 1).toString(),
+             "val": obj.label,
+             "path": obj.path,
+             "state": obj.state,
+             "appName": appName,
+             "default": obj.default
+            };
+          }
           return formattedObj;
         });
       },
