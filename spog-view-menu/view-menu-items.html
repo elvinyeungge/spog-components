@@ -105,17 +105,15 @@
         var menuItems = responseData.menuItems;
         this.appName = responseData.appName;        
         this.dropdownItems = menuItems.map(function(obj, index){
-          if(obj.isAdmin && !isAdmin){
-          }
-          else{
-              var formattedObj = {
-               "key": (index + 1).toString(),
-               "val": obj.label,
-               "path": obj.path,
-               "state": obj.state,
-               "appName": appName,
-               "default": obj.default
-              };
+          if(!obj.isAdmin || !isAdmin){
+            var formattedObj = {
+             "key": (index + 1).toString(),
+             "val": obj.label,
+             "path": obj.path,
+             "state": obj.state,
+             "appName": appName,
+             "default": obj.default
+            };
           }
           return formattedObj;
         });
