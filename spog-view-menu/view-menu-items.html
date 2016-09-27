@@ -105,8 +105,8 @@
         var menuItems = responseData.menuItems;
         this.appName = responseData.appName;        
         this.dropdownItems = menuItems.map(function(obj, index){
-          var notAnAdmin = (obj.isAdmin && isAdmin) || (!obj.isAdmin && !isAdmin) || (!obj.isAdmin || isAdmin);
-          if(notAnAdmin){
+          var showMenuItem = (obj.isAdmin && isAdmin) || (!obj.isAdmin && !isAdmin) || (!obj.isAdmin || isAdmin);
+          if(showMenuItem){
             var formattedObj = {
              "key": (index + 1).toString(),
              "val": obj.label,
