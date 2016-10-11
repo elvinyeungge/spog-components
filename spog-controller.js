@@ -33,10 +33,8 @@ class controller {
 	};
 
 	self.initContextBrowser = function(browser){
-		console.log(document.getElementById('js-view'));
 		$interval.cancel(self.intervalToFetchContextBrowser);
 		//initial context call for first column
-		console.log(document.getElementById('js-view').innerHTML);
 	    $http.get('contextbrowser/api/allInstances?components=BASIC&parent=null')
 	        .then(function(response){
 	            if(response.data.length>0){
