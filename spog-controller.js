@@ -7,11 +7,10 @@ class controller {
 
   init($http, $state, $q, $rootScope, $scope, $timeout, $interval, AppHubService){
   	var self = this;
-	
-	 	
+  	var onPageLoad =  true;
+	var autoClickOpen = true;
 	angular.element(document).ready(function() {
 		var counter = 0;
-		
 		if(!window.chrome){
 			self.intervalToFetchContextBrowser = $interval(function() {
 				self.fetchContextBrowser();	
@@ -20,6 +19,12 @@ class controller {
 			self.fetchContextBrowser();
 		}
 		self.navigateToSelectedView();
+
+		var data = JSON.parse(window.sessionStorage.getItem('selectedIds'));
+		if(data){
+			var div = '<div class="pxh-spinner pxh-spinner--large persisting-context-spinner" style="top:26%; right:46.5%; position:fixed;"></div>'; 
+		    document.querySelector('header').insertAdjacentHTML('beforeend', div);
+		}
 	});
 	
 	self.fetchContextBrowser = function(){
@@ -32,17 +37,20 @@ class controller {
 	self.initContextBrowser = function(browser){
 		$interval.cancel(self.intervalToFetchContextBrowser);
 		//initial context call for first column
-	    $http.get('contextbrowser/api/allInstances?components=BASIC&parent=null')
+		$http.get('contextbrowser/api/allInstances?components=BASIC&parent=null')
 	        .then(function(response){
 	            if(response.data.length>0){
 	                for(var ii=0;ii<response.data.length;ii++){
 	                    //add identifiers to children
-	                    
 	                    response.data[ii]['identifier'] = '00-' + ii;
 	                    response.data[ii]['hasChildren'] = true;
 	                    response.data[ii]['isOpenable'] = true;
 	                }
 	                browser.browserContext=initialContext(response.data);
+	                var data = JSON.parse(window.sessionStorage.getItem('selectedIds'));
+					if(data){
+		                persistingContextBrowser('enterprises');
+		            }
 	            }
 	        });
 
@@ -81,6 +89,7 @@ class controller {
 	    } else {
 	        parent = node.uri;
 	    }
+
 	    //url to call to apm - parent comes from node. null returns enterprises
 	    var url = 'contextbrowser/api/allInstances?components=BASIC&parent=' + parent;
 	    //call itself
@@ -88,12 +97,27 @@ class controller {
 	        .then(function(response){
 	            if(response.data.length>0){
 	                for(var ii=0;ii<response.data.length;ii++){
-	                    //add context-browser attributes
 	                    response.data[ii]['identifier'] = node.identifier + ('a' + ii);
 	                    response.data[ii]['hasChildren'] = true;
 	                    response.data[ii]['isOpenable'] = true;
 	                }
-	            }
+	                if(onPageLoad){
+						if(parent.includes("enterprises")){
+		                	persistingContextBrowser('sites');
+		                }
+		                else if(parent.includes("sites")){
+		                	persistingContextBrowser('segments');
+		                }
+		                else if(parent.includes("segments")){
+		                	persistingContextBrowser('assets');
+		                }
+		            }
+	                else if(autoClickOpen && !onPageLoad){
+	                	var colBrowser = document.querySelector('px-context-browser');
+	                	colBrowser.querySelector('.openable').click();
+	                } 
+	                autoClickOpen = false; 
+	            } 
 
 	            if(nodeId){
 	                var pId = nodeId;
@@ -105,6 +129,43 @@ class controller {
 	    //don't forget to return the promise!
 	    return deferred.promise;
 	}
+	function persistingContextBrowser(val){
+		var data = JSON.parse(window.sessionStorage.getItem('selectedIds'));
+		if(data){
+	        var persistingContextBrowser = data[val];
+	        setTimeout(function(){
+	          var span = document.querySelectorAll('span');
+	          for(var si=0; si < span.length; si++){
+	            var eventSpan = span[si].innerHTML;
+	            var eventName = persistingContextBrowser.name;
+	            if(eventSpan == eventName){
+	              span[si].click();
+	              if(val == 'enterprises'){
+	              	if(!data['sites']){	closePersistingContextBrowser(); }
+	          	  }
+	              else if(val == 'sites'){
+	              	if(!data['segements']){ closePersistingContextBrowser(); }
+	              }
+	              else if(val == 'segements'){
+	              	if(!data['assets']){ closePersistingContextBrowser(); }
+	              }
+	              else if(val == 'assets'){ 
+	              	closePersistingContextBrowser();
+	              }
+	              break;
+	            }
+	          }
+	      	},1000);
+	    }
+	}
+
+	function closePersistingContextBrowser(){
+		var elem = document.getElementsByClassName("persisting-context-spinner");
+		if(elem){ elem[0].remove(); }
+		var colBrowser = document.querySelector('px-context-browser');
+    	colBrowser.querySelector('h1').click();   	
+    	onPageLoad = false;
+	} 
 
 	function initialContext(data){
 		var obj = {};
