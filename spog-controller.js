@@ -9,12 +9,8 @@ class controller {
   	var self = this;
   	var onPageLoad =  true;
 	var autoClickOpen = true;
-	$scope.reuse = true; 	
 	angular.element(document).ready(function() {
 		var counter = 0;
-		var windowLoad = 0;
-
-
 		if(!window.chrome){
 			self.intervalToFetchContextBrowser = $interval(function() {
 				self.fetchContextBrowser();	
@@ -106,18 +102,16 @@ class controller {
 	                    response.data[ii]['isOpenable'] = true;
 	                }
 	                if(onPageLoad){
-
-		                if(parent.includes("enterprises")){
+						if(parent.includes("enterprises")){
 		                	persistingContextBrowser('sites');
 		                }
 		                else if(parent.includes("sites")){
-		                	persistingContextBrowser('segements');
+		                	persistingContextBrowser('segments');
 		                }
-		                else if(parent.includes("segements")){
+		                else if(parent.includes("segments")){
 		                	persistingContextBrowser('assets');
 		                }
-		                
-	                }
+		            }
 	                else if(autoClickOpen && !onPageLoad){
 	                	var colBrowser = document.querySelector('px-context-browser');
 	                	colBrowser.querySelector('.openable').click();
@@ -147,22 +141,16 @@ class controller {
 	            if(eventSpan == eventName){
 	              span[si].click();
 	              if(val == 'enterprises'){
-	              	if(!data['sites']){
-	              		closePersistingContextBrowser();
-	              	}
+	              	if(!data['sites']){	closePersistingContextBrowser(); }
 	          	  }
 	              else if(val == 'sites'){
-	              	if(!data['segements']){
-	              		closePersistingContextBrowser();
-	              	}
+	              	if(!data['segements']){ closePersistingContextBrowser(); }
 	              }
 	              else if(val == 'segements'){
-	              	if(!data['assets']){
-	              		closePersistingContextBrowser();
-	              	}
+	              	if(!data['assets']){ closePersistingContextBrowser(); }
 	              }
-	              else if(val == 'assets'){
-	              		closePersistingContextBrowser();
+	              else if(val == 'assets'){ 
+	              	closePersistingContextBrowser();
 	              }
 	              break;
 	            }
@@ -173,8 +161,8 @@ class controller {
 
 	function closePersistingContextBrowser(){
 		var elem = document.getElementsByClassName("persisting-context-spinner");
-		elem[0].remove(); 
-      	var colBrowser = document.querySelector('px-context-browser');
+		if(elem){ elem[0].remove(); }
+		var colBrowser = document.querySelector('px-context-browser');
     	colBrowser.querySelector('h1').click();   	
     	onPageLoad = false;
 	} 
