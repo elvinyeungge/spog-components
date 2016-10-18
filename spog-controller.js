@@ -144,9 +144,9 @@ class controller {
 	              	if(!data['sites']){	closePersistingContextBrowser(); }
 	          	  }
 	              else if(val == 'sites'){
-	              	if(!data['segements']){ closePersistingContextBrowser(); }
+	              	if(!data['segments']){ closePersistingContextBrowser(); }
 	              }
-	              else if(val == 'segements'){
+	              else if(val == 'segments'){
 	              	if(!data['assets']){ closePersistingContextBrowser(); }
 	              }
 	              else if(val == 'assets'){ 
