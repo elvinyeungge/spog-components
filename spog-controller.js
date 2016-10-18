@@ -9,7 +9,7 @@ class controller {
   	var self = this;
   	var onPageLoad =  true;
 	var autoClickOpen = true;
-	 	
+	$scope.reuse = true; 	
 	angular.element(document).ready(function() {
 		var counter = 0;
 		var windowLoad = 0;
@@ -23,6 +23,12 @@ class controller {
 			self.fetchContextBrowser();
 		}
 		self.navigateToSelectedView();
+
+		var data = JSON.parse(window.sessionStorage.getItem('selectedIds'));
+		if(data){
+			var div = '<div class="pxh-spinner pxh-spinner--large persisting-context-spinner" style="top:26%; right:46.5%; position:fixed;"></div>'; 
+		    document.querySelector('header').insertAdjacentHTML('beforeend', div);
+		}
 	});
 	
 	self.fetchContextBrowser = function(){
@@ -35,7 +41,7 @@ class controller {
 	self.initContextBrowser = function(browser){
 		$interval.cancel(self.intervalToFetchContextBrowser);
 		//initial context call for first column
-	    $http.get('contextbrowser/api/allInstances?components=BASIC&parent=null')
+		$http.get('contextbrowser/api/allInstances?components=BASIC&parent=null')
 	        .then(function(response){
 	            if(response.data.length>0){
 	                for(var ii=0;ii<response.data.length;ii++){
@@ -47,8 +53,6 @@ class controller {
 	                browser.browserContext=initialContext(response.data);
 	                var data = JSON.parse(window.sessionStorage.getItem('selectedIds'));
 					if(data){
-		                var div = '<div class="pxh-spinner pxh-spinner--large persisting-context-spinner" style="top:26%; right:46.5%; position:fixed;"></div>'; 
-		                document.getElementById('js-view').innerHTML += div;
 		                persistingContextBrowser('enterprises');
 		            }
 	            }
@@ -169,7 +173,7 @@ class controller {
 
 	function closePersistingContextBrowser(){
 		var elem = document.getElementsByClassName("persisting-context-spinner");
-        elem[0].remove(); 
+		elem[0].remove(); 
       	var colBrowser = document.querySelector('px-context-browser');
     	colBrowser.querySelector('h1').click();   	
     	onPageLoad = false;
