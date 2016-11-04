@@ -1,37 +1,32 @@
-var locale = (window.navigator.languages) ? window.navigator.languages[0]
-              : (window.navigator.userLanguage||window.navigator.language);//gets user's preffered language as dictated in settings
-var supportedLocales = ['en-US', 'fr-FR'];
-var defaultScript = 'modules/i18n/default.properties';
-var scriptName ="modules/i18n/";
-//locale = 'te-st';
-if(!supportedLocales.includes(locale)){
-  scriptName = defaultScript;
-}else{
-  scriptName += locale;
-  scriptName = scriptName.toLowerCase();
-  scriptName +=  ".properties";
-}
 
-var localeData;
-var xmlhttp =  new XMLHttpRequest();
+//gets user's preferred language as dictated in settings
+var locale = (window.navigator.languages) ? window.navigator.languages[0]
+              : (window.navigator.userLanguage || window.navigator.language);
+
+var defaultScript = 'modules/i18n/default.properties',
+    scriptName = defaultScript.replace("default", locale),
+    xmlhttp = new XMLHttpRequest(),
+    localeData;
+
+// Handle callback
 xmlhttp.onreadystatechange = function() {
-  if(xmlhttp.readyState == XMLHttpRequest.DONE){
-    if(xmlhttp.status === 404){
+  if (xmlhttp.readyState == XMLHttpRequest.DONE) {
+    // Failed to find preferred locale properties file
+    if (xmlhttp.status === 404) {
       scriptName = defaultScript;
-      xmlhttp.open("GET",scriptName,true);
+      xmlhttp.open("GET", defaultScript, true);
       xmlhttp.send();
-    } else{
+    } else {
+      // Success with preferred locale
       localeData = parseProperties(xmlhttp.responseText);
       localeData['currentLocale'] = locale;
       console.log('Localized using ' + scriptName);
     }
   }
 };
+// First try to get the preferred locale properties file
 xmlhttp.open("GET", scriptName, true);
 xmlhttp.send();
-
-
-
 
 function parseProperties(properties){
   var keyValuePairs = properties.split(/$/m);
