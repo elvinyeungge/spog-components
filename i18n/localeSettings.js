@@ -1,6 +1,6 @@
 
 // Best effort to gets user's preferred language translations as dictated in browser settings.
-// This implements two stage fallback to the default language resource.
+// This implements two stage fallback to the default language resource or fall through if no default.properties exists.
 // Given a region specific request, e.g. 'fr-CA', the code attempts to get the region specific properties.
 // If the region specific resource does not exist, the code falls back and attempts to get a language properties resource, e.g. 'fr'.
 // If that fails, the code falls back to the default properties resource.
