@@ -5,7 +5,7 @@
 // If the region specific resource does not exist, the code falls back and attempts to get a language properties resource, e.g. 'fr'.
 // If that fails, the code falls back to the default properties resource.
 // In general, we should provide language keyed resources. And only provide region specific resources when absolutely necessary.
-// That way if a Swiss user knows we handle French for Canada, he has a decent chance of handling French in general. 
+// That way if a Swiss user knows we handle French for Canada, he has a decent chance of handling French in general.
 // Though not necessarily Swiss French (fr-CH).
 
 var locale = (window.navigator.languages) ? window.navigator.languages[0]
@@ -15,6 +15,7 @@ var defaultScript = 'modules/i18n/default.properties',
     scriptName = defaultScript.replace("default", locale),
     localeRegion = locale.split('-'),
     xmlhttp = new XMLHttpRequest(),
+    requestedLocale = locale,
     localeData;
 
 // Handle callback
@@ -22,25 +23,33 @@ xmlhttp.onreadystatechange = function() {
   if (xmlhttp.readyState == XMLHttpRequest.DONE) {
     // Failed to find preferred locale properties file
     if (xmlhttp.status === 404) {
-      // if locale was language-region, fallback to just language. i.e. fr-CA -> fr
-      // make sure to prevent infinite loop with second locale clause
-      if (localeRegion.length > 1 && locale != localeRegion[0]) {
-        locale = localeRegion[0];
-        scriptName = defaultScript.replace("default", localeRegion[0]);
-        xmlhttp.open("GET", scriptName, true);
-        xmlhttp.send();
+      // I've fallen and I can't get up...
+      // No default.properties, just restore and drop through. UI should show defaults or keys
+      if (locale == 'default') {
+        localeData = {};
+        localeData['currentLocale'] = locale;
+        console.log('All fallbacks failed for requested locale: ' + requestedLocale);
       } else {
-        // Otherwise, fallback to default.properties
-        locale = 'default'
-        scriptName = defaultScript;
-        xmlhttp.open("GET", scriptName, true);
-        xmlhttp.send();
+        // if locale was language-region, first fallback to just language. i.e. fr-CA -> fr
+        // make sure to prevent infinite loop with second locale clause
+        if (localeRegion.length > 1 && locale != localeRegion[0]) {
+          locale = localeRegion[0];
+          scriptName = defaultScript.replace("default", localeRegion[0]);
+          xmlhttp.open("GET", scriptName, true);
+          xmlhttp.send();
+        } else {
+          // Second fallback to default.properties
+          locale = 'default'
+          scriptName = defaultScript;
+          xmlhttp.open("GET", scriptName, true);
+          xmlhttp.send();
+        }
       }
     } else {
       // Success with preferred locale
       localeData = parseProperties(xmlhttp.responseText);
-      localeData['currentLocale'] = locale;
-      console.log('Localized using: ' + scriptName);
+      localeData['currentLocale'] = requestedLocale;
+      console.log('Using localizations with locale = ' + loc);
     }
   }
 };
