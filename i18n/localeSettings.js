@@ -59,7 +59,7 @@ xmlhttp.onreadystatechange = function() {
                     scriptName = defaultScript.replace("default", localeRegion[0]);
                     xmlhttp.open("GET", scriptName, true);
                     xmlhttp.send();
-                } else {de
+                } else {
                     localeData = parseProperties(xmlhttp.responseText, {'currentLocale': locale});
                     if (regionalOverrides != "") {
                         localeData = parseProperties(regionalOverrides, localeData);
