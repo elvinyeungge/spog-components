@@ -67,7 +67,9 @@ xmlhttp.onreadystatechange = function() {
                     localeData['currentLocale'] = locale;
                 }
             }
-            console.log('Using localizations with locale = ' + localeData['currentLocale']);
+            if (localeData) {
+              console.log('Using localizations with locale = ' + localeData['currentLocale']);
+            }
         }
     }
 };
