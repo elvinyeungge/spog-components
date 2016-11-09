@@ -49,7 +49,7 @@ xmlhttp.onreadystatechange = function() {
             }
         } else { // Successful requests
             if (locale == 'default') {
-                localeData = parseProperties(xmlhttp.responseText, {});
+                localeData = parseProperties(xmlhttp.responseText, {'currentLocale': 'default'});
                 localeData['currentLocale'] = locale;
             } else {
                 // language-region request
@@ -59,8 +59,8 @@ xmlhttp.onreadystatechange = function() {
                     scriptName = defaultScript.replace("default", localeRegion[0]);
                     xmlhttp.open("GET", scriptName, true);
                     xmlhttp.send();
-                } else {
-                    localeData = parseProperties(xmlhttp.responseText, {});
+                } else {de
+                    localeData = parseProperties(xmlhttp.responseText, {'currentLocale': locale});
                     if (regionalOverrides != "") {
                         localeData = parseProperties(regionalOverrides, localeData);
                     }
