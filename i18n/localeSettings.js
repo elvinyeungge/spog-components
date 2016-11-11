@@ -18,7 +18,7 @@ var defaultScript = 'modules/i18n/default.properties',
     xmlhttp = new XMLHttpRequest(),
     requestedLocale = locale,
     regionalOverrides = "",
-    localeData;
+    localeData = {};
 
 // Handle callback
 xmlhttp.onreadystatechange = function() {
@@ -28,7 +28,6 @@ xmlhttp.onreadystatechange = function() {
             // I've fallen and I can't get up...
             // No default.properties, just restore and drop through. UI should show defaults or keys
             if (locale == 'default') {
-                localeData = {};
                 localeData['currentLocale'] = locale;
                 console.log('All fallbacks failed for requested locale: ' + requestedLocale);
             } else {
