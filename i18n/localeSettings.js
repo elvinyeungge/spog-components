@@ -12,6 +12,7 @@
 var locale = (window.navigator.languages) ? window.navigator.languages[0] :
     (window.navigator.userLanguage || window.navigator.language);
 
+    locale = locale.toLowerCase();
 var defaultScript = 'modules/i18n/default.properties',
     scriptName = defaultScript.replace("default", locale),
     localeRegion = locale.split('-'),
