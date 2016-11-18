@@ -55,10 +55,10 @@ class controller {
 	            else{
 	            	closeSpinner();
 	            }
-	        } function(data) {
-        			// Handle error here
-        		closeSpinner();
-   			});
+	        }, function(data) {
+			// Handle error here
+			closeSpinner();
+		});
 
 	    browser.handlers = {
 	        getChildren: function(parent, newIndex) {
@@ -133,10 +133,10 @@ class controller {
 	                nodeId = node.name;
 	            }
 	            deferred.resolve({data:response.data,meta:{parentId:nodeId}});
-	        } function(data) {
+	        }, function(data) {
         		// Handle error here
         		closeSpinner();
-   			}); //eo http.get.then
+		}); //eo http.get.then
 	    //don't forget to return the promise!
 	    return deferred.promise;
 	}
