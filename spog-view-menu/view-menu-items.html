@@ -1,5 +1,5 @@
 <dom-module id="view-menu-items">
-
+  <script src="../i18n/localeSettings.js"></script>
   <link rel="import" type="css" href="view-menu-items.css">
   <template>
       <iron-ajax
@@ -109,7 +109,7 @@
           if(showMenuItem){
             var formattedObj = {
              "key": (index + 1).toString(),
-             "val": obj.label,
+             "val": localeData[obj.label.toString()],
              "path": obj.path,
              "state": obj.state,
              "appName": appName,
