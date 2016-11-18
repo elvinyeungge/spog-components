@@ -49,7 +49,7 @@ xmlhttp.onreadystatechange = function() {
             }
         } else { // Successful requests
             if (locale == 'default') {
-                localeData = parseProperties(xmlhttp.responseText, {});
+                localeData = parseProperties(xmlhttp.responseText, {'currentLocale': 'default'});
                 localeData['currentLocale'] = locale;
             } else {
                 // language-region request
@@ -60,14 +60,16 @@ xmlhttp.onreadystatechange = function() {
                     xmlhttp.open("GET", scriptName, true);
                     xmlhttp.send();
                 } else {
-                    localeData = parseProperties(xmlhttp.responseText, {});
+                    localeData = parseProperties(xmlhttp.responseText, {'currentLocale': locale});
                     if (regionalOverrides != "") {
                         localeData = parseProperties(regionalOverrides, localeData);
                     }
                     localeData['currentLocale'] = locale;
                 }
             }
-            console.log('Using localizations with locale = ' + localeData['currentLocale']);
+            if (localeData) {
+              console.log('Using localizations with locale = ' + localeData['currentLocale']);
+            }
         }
     }
 };
