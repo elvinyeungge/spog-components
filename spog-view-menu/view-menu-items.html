@@ -10,22 +10,22 @@
         content-type="application/json"
         on-response="_getViewMenuItemsData">
       </iron-ajax>
-      <div 
+      <div
           id="pxDropdownContainer"
           class="px-dropdown-container">
-          <px-dropdown 
+          <px-dropdown
           id="pxDropdown"
           display-value="Views"
           on-tap="_selectedViewChanged">
-          <px-dropdown-content 
+          <px-dropdown-content
             items="{{dropdownItems}}"
             class="px-dropdown-content"
             max-cont-character-width="10"
-            extend-dropdown="true" 
+            extend-dropdown="true"
             extend-dropdown-by="15">
             </px-dropdown-content>
           </px-dropdown>
-      </div> 
+      </div>
   </template>
 </dom-module>
 
@@ -67,7 +67,7 @@
       },
       _selectedViewChanged: function(evt) {
         var selectedView = this.$.pxDropdown.displayValue;
-        
+
         var idx = this._getSelectedViewIndex(this.dropdownItems, selectedView);
         if(idx > -1){
           this._emitSelectedViewChangedEvent(this.dropdownItems[idx]);
@@ -103,13 +103,14 @@
         var isAdmin = this._userIsAdmin();
         var appName = responseData.appName;
         var menuItems = responseData.menuItems;
-        this.appName = responseData.appName;        
+        this.appName = responseData.appName;
         this.dropdownItems = menuItems.map(function(obj, index){
+          var label = (localeData[obj.label.toString()]) ? localeData[obj.label.toString()] : obj.label.toString();
           var showMenuItem = (obj.isAdmin && isAdmin) || (!obj.isAdmin && !isAdmin) || (!obj.isAdmin || isAdmin);
           if(showMenuItem){
             var formattedObj = {
              "key": (index + 1).toString(),
-             "val": localeData[obj.label.toString()],
+             "val": label,
              "path": obj.path,
              "state": obj.state,
              "appName": appName,
@@ -144,7 +145,7 @@
       _changeViewsZIndex: function(colBrowser){
         var viewMenuItems =  document.querySelector('view-menu-items');
         var colBrowserContainerHeader = document.querySelector('.column-browser-container header');
-        
+
         window.addEventListener('contextBrowserOpening', function(event){
           if(viewMenuItems){
             viewMenuItems.style.zIndex = "-1";
@@ -155,7 +156,7 @@
           if(viewMenuItems){
             viewMenuItems.style.zIndex = "0";
           }
-          
+
         });
       },
       _updateStyleIfNoContextBrowser: function(){
