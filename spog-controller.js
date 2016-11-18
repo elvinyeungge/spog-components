@@ -52,7 +52,13 @@ class controller {
 		                persistingContextBrowser('enterprises');
 		            }
 	            }
-	        });
+	            else{
+	            	closeSpinner();
+	            }
+	        }, function(data) {
+			// Handle error here
+			closeSpinner();
+		});
 
 	    browser.handlers = {
 	        getChildren: function(parent, newIndex) {
@@ -117,17 +123,26 @@ class controller {
 	                	colBrowser.querySelector('.openable').click();
 	                } 
 	                autoClickOpen = false; 
+	            }
+	            else{
+	            	closeSpinner();
 	            } 
-
 	            if(nodeId){
 	                var pId = nodeId;
 	            } else{
 	                nodeId = node.name;
 	            }
 	            deferred.resolve({data:response.data,meta:{parentId:nodeId}});
-	        }); //eo http.get.then
+	        }, function(data) {
+        		// Handle error here
+        		closeSpinner();
+		}); //eo http.get.then
 	    //don't forget to return the promise!
 	    return deferred.promise;
+	}
+	function closeSpinner(){
+    		var elem = document.getElementsByClassName("persisting-context-spinner");
+			if(elem && elem[0]){ elem[0].remove(); }
 	}
 	function persistingContextBrowser(val){
 		var data = JSON.parse(window.sessionStorage.getItem('selectedIds'));
@@ -160,8 +175,7 @@ class controller {
 	}
 
 	function closePersistingContextBrowser(){
-		var elem = document.getElementsByClassName("persisting-context-spinner");
-		if(elem){ elem[0].remove(); }
+		closeSpinner();
 		var colBrowser = document.querySelector('px-context-browser');
     	colBrowser.querySelector('h1').click();   	
     	onPageLoad = false;
