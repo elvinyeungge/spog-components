@@ -1,25 +1,30 @@
+window.localeData = window.localeData || (function() {
+    "use strict";
+
+    window.localeData = {};
+
 var locale = (window.navigator.languages) ? window.navigator.languages[0]
               : (window.navigator.userLanguage||window.navigator.language);//gets user's preffered language as dictated in settings
 var defaultScript = 'modules/i18n/default.properties';
 var language = locale.split("-")[0];
 var target = locale;
 
-var localeData;
 var xmlhttp =  new XMLHttpRequest();
 xmlhttp.onreadystatechange = function() {
+  window.localeData = window.localeData || {};
   if(xmlhttp.readyState == XMLHttpRequest.DONE){
     if(xmlhttp.status === 404){
       target = (target == language) ? 'default' : language;
       xmlhttp.open("GET",getScriptName(target),true);
       xmlhttp.send();
     } else{
-      localeData = parseProperties(xmlhttp.responseText);
-      localeData['currentLocale'] = locale;
+      window.localeData = parseProperties(xmlhttp.responseText);
+      window.localeData['currentLocale'] = locale;
       console.log('Localized using ' + getScriptName(target));
     }
   }
 };
-if(!localeData){
+if(Object.keys(window.localeData).length === 0){
   xmlhttp.open("GET", getScriptName(target), true);
   xmlhttp.send();
 }
@@ -40,3 +45,5 @@ function parseProperties(properties){
   });
   return propertiesObj;
 }
+
+})();
