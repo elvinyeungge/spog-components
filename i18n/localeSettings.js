@@ -14,6 +14,9 @@ xmlhttp.onreadystatechange = function() {
   window.localeData = window.localeData || {};
   if(xmlhttp.readyState == XMLHttpRequest.DONE){
     if(xmlhttp.status === 404){
+      //could not find file, so checking if file is the locale file (en-us) or the language file (en)
+      //if it is locale file, set target file to language - otherwise, set to default
+      //thus, the script searches for en-us, then en, then default
       target = (target == language) ? 'default' : language;
       xmlhttp.open("GET",getScriptName(target),true);
       xmlhttp.send();
