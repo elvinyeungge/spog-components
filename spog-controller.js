@@ -108,13 +108,13 @@ class controller {
 	                    response.data[ii]['isOpenable'] = true;
 	                }
 	                if(onPageLoad){
-						if(parent.includes("enterprises")){
+						if(parent.indexOf("enterprises")){
 		                	persistingContextBrowser('sites');
 		                }
-		                else if(parent.includes("sites")){
+		                else if(parent.indexOf("sites")){
 		                	persistingContextBrowser('segments');
 		                }
-		                else if(parent.includes("segments")){
+		                else if(parent.indexOf("segments")){
 		                	persistingContextBrowser('assets');
 		                }
 		            }
