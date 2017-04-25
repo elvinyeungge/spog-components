@@ -91,7 +91,7 @@
       },
       _userIsAdmin: function () {
         var featuresArray = window.nav.user.features;
-        if (featuresArray && featuresArray.includes("WIP Admin")) {
+        if (featuresArray && (featuresArray.indexOf("WIP Admin") >= 0)) {
             this.isAdmin = true;
         }
         else {
